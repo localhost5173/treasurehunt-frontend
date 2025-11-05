@@ -1,7 +1,11 @@
 <script lang="ts">
+  import { goto } from '$app/navigation';
+  import { browser } from '$app/environment';
   import { authStore } from '$lib/stores/auth';
   import { api, APIError } from '$lib/api/api';
+  import { onMount } from 'svelte';
 
+  let isAuthenticated = false;
   let isDragging = false;
   let prompt = '';
   let imageFile: File | null = null;
@@ -10,7 +14,20 @@
   let loading = false;
   let error = '';
 
-  $: token = $authStore.token;
+  let token = '';
+
+  onMount(async () => {
+    if (browser) {
+      isAuthenticated = await authStore.checkAuth();
+      if (!isAuthenticated) {
+        goto('/login');
+      } else {
+        authStore.subscribe(state => {
+          token = state.token || '';
+        });
+      }
+    }
+  });
 
   function handleDragEnter(e: DragEvent) {
     e.preventDefault();
@@ -115,84 +132,109 @@
     result = null;
     error = '';
   }
+
+  function goBack() {
+    goto('/');
+  }
 </script>
 
-<div class="upload-container">
-  <h2 class="upload-title">Treasure Hunt Image Analyzer</h2>
+{#if isAuthenticated}
+  <div class="page-container">
+    <div class="upload-container">
+      <h2 class="upload-title">Treasure Hunt Image Analyzer</h2>
 
-  <div
-    class="dropzone"
-    class:dragging={isDragging}
-    on:dragenter={handleDragEnter}
-    on:dragleave={handleDragLeave}
-    on:dragover={handleDragOver}
-    on:drop={handleDrop}
-    role="button"
-    tabindex="0"
-  >
-    {#if imagePreview}
-      <img src={imagePreview} alt="Preview" class="image-preview" />
-    {:else}
-      <div class="dropzone-content">
-        <div class="icon">📸</div>
-        <p>Drag & drop an image here</p>
-        <p class="or">or</p>
-        <label for="file-input" class="file-label">
-          Browse Files
-        </label>
-        <input
-          type="file"
-          id="file-input"
-          accept="image/*"
-          on:change={handleFileInput}
-          style="display: none;"
-        />
+      <div
+        class="dropzone"
+        class:dragging={isDragging}
+        on:dragenter={handleDragEnter}
+        on:dragleave={handleDragLeave}
+        on:dragover={handleDragOver}
+        on:drop={handleDrop}
+        role="button"
+        tabindex="0"
+      >
+        {#if imagePreview}
+          <img src={imagePreview} alt="Preview" class="image-preview" />
+        {:else}
+          <div class="dropzone-content">
+            <div class="icon">📸</div>
+            <p>Drag & drop an image here</p>
+            <p class="or">or</p>
+            <label for="file-input" class="file-label">
+              Browse Files
+            </label>
+            <input
+              type="file"
+              id="file-input"
+              accept="image/*"
+              on:change={handleFileInput}
+              style="display: none;"
+            />
+          </div>
+        {/if}
       </div>
-    {/if}
+
+      {#if imagePreview}
+        <div class="prompt-section">
+          <label for="prompt">What are you looking for?</label>
+          <input
+            type="text"
+            id="prompt"
+            bind:value={prompt}
+            placeholder="e.g., Is there a cat in the image?"
+            disabled={loading}
+          />
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-analyze" on:click={analyzeImage} disabled={loading || !prompt}>
+            {loading ? 'Analyzing...' : 'Analyze Image'}
+          </button>
+          <button class="btn btn-reset" on:click={reset} disabled={loading}>
+            Reset
+          </button>
+        </div>
+      {/if}
+
+      {#if error}
+        <div class="error-message">{error}</div>
+      {/if}
+
+      {#if result !== null}
+        <div class="result-box" class:found={result} class:not-found={!result}>
+          <div class="result-icon">{result ? '✅' : '❌'}</div>
+          <div class="result-text">
+            {result ? 'Yes! Found it!' : 'Not found'}
+          </div>
+          <div class="result-description">
+            {result 
+              ? 'The object you are looking for is present in the image!' 
+              : 'The object you are looking for was not found in the image.'}
+          </div>
+        </div>
+      {/if}
+
+      <button class="btn-back" on:click={goBack}>Back to Menu</button>
+    </div>
   </div>
-
-  {#if imagePreview}
-    <div class="prompt-section">
-      <label for="prompt">What are you looking for?</label>
-      <input
-        type="text"
-        id="prompt"
-        bind:value={prompt}
-        placeholder="e.g., Is there a cat in the image?"
-        disabled={loading}
-      />
-    </div>
-
-    <div class="button-group">
-      <button class="btn btn-analyze" on:click={analyzeImage} disabled={loading || !prompt}>
-        {loading ? 'Analyzing...' : 'Analyze Image'}
-      </button>
-      <button class="btn btn-reset" on:click={reset} disabled={loading}>
-        Reset
-      </button>
-    </div>
-  {/if}
-
-  {#if error}
-    <div class="error-message">{error}</div>
-  {/if}
-
-  {#if result !== null}
-    <div class="result-box" class:found={result} class:not-found={!result}>
-      <div class="result-icon">{result ? '✅' : '❌'}</div>
-      <div class="result-text">
-        {result ? 'Yes! Found it!' : 'Not found'}
-      </div>
-      <div class="result-description">
-        {result 
-          ? 'The object you are looking for is present in the image!' 
-          : 'The object you are looking for was not found in the image.'}
-      </div>
-    </div>
-  {/if}
-</div>
+{/if}
 
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+  .page-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Fredoka One', sans-serif;
+    background-image: url('/Background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    padding: 20px;
+  }
+
   .upload-container {
     background: rgba(40, 25, 5, 0.95);
     border-radius: 25px;
@@ -418,12 +460,39 @@
     color: #ffb300;
   }
 
+  .btn-back {
+    width: 100%;
+    margin-top: 20px;
+    padding: 15px 0;
+    font-size: 18px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    background: linear-gradient(#667eea, #764ba2);
+    box-shadow: 0px 5px 0px #4a3580;
+    transition: all 0.2s ease;
+    color: #fff;
+    font-family: 'Fredoka One', sans-serif;
+  }
+
+  .btn-back:hover {
+    transform: translateY(-3px);
+  }
+
+  .btn-back:active {
+    transform: translateY(3px);
+    box-shadow: 0px 0px 0px #4a3580;
+  }
+
   /* RESPONSIVE DESIGN */
   @media (max-width: 768px) {
+    .page-container {
+      padding: 15px;
+    }
+
     .upload-container {
       padding: 30px 25px;
       max-width: 100%;
-      margin: 20px;
     }
 
     .upload-title {
@@ -491,12 +560,20 @@
     .result-description {
       font-size: 15px;
     }
+
+    .btn-back {
+      font-size: 16px;
+      padding: 12px 0;
+    }
   }
 
   @media (max-width: 480px) {
+    .page-container {
+      padding: 10px;
+    }
+
     .upload-container {
       padding: 25px 20px;
-      margin: 15px;
       border-radius: 20px;
     }
 
@@ -583,12 +660,16 @@
       font-size: 13px;
       padding: 10px;
     }
+
+    .btn-back {
+      font-size: 15px;
+      padding: 11px 0;
+    }
   }
 
   @media (max-width: 360px) {
     .upload-container {
       padding: 20px 15px;
-      margin: 10px;
     }
 
     .upload-title {
@@ -623,10 +704,19 @@
       font-size: 14px;
       padding: 10px 0;
     }
+
+    .btn-back {
+      font-size: 14px;
+      padding: 10px 0;
+    }
   }
 
   /* Landscape orientation */
   @media (max-height: 600px) and (orientation: landscape) {
+    .page-container {
+      padding: 10px;
+    }
+
     .upload-container {
       padding: 20px;
     }
@@ -660,6 +750,12 @@
 
     .result-text {
       font-size: 20px;
+    }
+
+    .btn-back {
+      padding: 10px 0;
+      font-size: 15px;
+      margin-top: 15px;
     }
   }
 </style>

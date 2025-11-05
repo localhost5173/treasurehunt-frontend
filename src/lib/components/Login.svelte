@@ -193,4 +193,85 @@
   .link-btn:hover {
     color: #ff9900;
   }
+
+  /* RESPONSIVE DESIGN */
+  @media (max-width: 768px) {
+    .auth-container {
+      padding: 30px 25px;
+      max-width: 100%;
+      margin: 20px;
+    }
+
+    .auth-title {
+      font-size: 36px;
+      margin-bottom: 25px;
+    }
+
+    .form-group label {
+      font-size: 16px;
+    }
+
+    .form-group input {
+      padding: 10px 14px;
+      font-size: 15px;
+    }
+
+    .btn-submit {
+      font-size: 18px;
+      padding: 12px 0;
+    }
+
+    .switch-auth {
+      font-size: 15px;
+    }
+
+    .link-btn {
+      font-size: 15px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .auth-container {
+      padding: 25px 20px;
+      margin: 15px;
+      border-radius: 20px;
+    }
+
+    .auth-title {
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    .auth-form {
+      gap: 15px;
+    }
+
+    .form-group label {
+      font-size: 15px;
+    }
+
+    .form-group input {
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    .btn-submit {
+      font-size: 16px;
+      padding: 12px 0;
+    }
+
+    .switch-auth {
+      font-size: 14px;
+      margin-top: 15px;
+    }
+
+    .link-btn {
+      font-size: 14px;
+    }
+
+    .error-message {
+      font-size: 13px;
+      padding: 10px;
+    }
+  }
 </style>

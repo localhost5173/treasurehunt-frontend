@@ -887,8 +887,337 @@
 		transition: all 0.2s;
 	}
 
-	.secondary-button:hover {
-		background: #667eea;
-		color: white;
-	}
+  .secondary-button:hover {
+    background: #667eea;
+    color: white;
+  }
+
+  /* RESPONSIVE DESIGN */
+  @media (max-width: 768px) {
+    .challenge-container {
+      padding: 1rem;
+    }
+
+    .start-form,
+    .active-challenge {
+      padding: 1.5rem;
+    }
+
+    .start-form h2 {
+      font-size: 1.75rem;
+    }
+
+    .challenge-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .challenge-header h2 {
+      font-size: 1.5rem;
+    }
+
+    .challenge-info {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .navigation-header {
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 0.75rem;
+    }
+
+    .nav-button {
+      width: 100%;
+      min-width: auto;
+      font-size: 1rem;
+      padding: 0.75rem;
+    }
+
+    .item-counter {
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .current-item-card {
+      padding: 1.5rem;
+    }
+
+    .item-name-large {
+      font-size: 2rem;
+      letter-spacing: 1px;
+    }
+
+    .item-instruction {
+      font-size: 1rem;
+    }
+
+    .upload-zone {
+      padding: 2rem 1rem;
+    }
+
+    .upload-label {
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+    }
+
+    .upload-icon {
+      font-size: 2.5rem;
+    }
+
+    .image-preview-large img {
+      height: 300px;
+    }
+
+    .verify-button {
+      font-size: 1.125rem;
+      padding: 1rem;
+    }
+
+    .items-grid-mini {
+      grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+      gap: 0.4rem;
+    }
+
+    .mini-item {
+      font-size: 0.875rem;
+    }
+
+    .completion-message {
+      padding: 2rem 1rem;
+    }
+
+    .completion-message h3 {
+      font-size: 1.75rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .challenge-container {
+      padding: 0.5rem;
+    }
+
+    .start-form,
+    .active-challenge {
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    .start-form h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .start-form p {
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      font-size: 0.875rem;
+    }
+
+    .form-group select,
+    .form-group input {
+      padding: 0.6rem;
+      font-size: 0.9rem;
+    }
+
+    .challenge-header h2 {
+      font-size: 1.25rem;
+    }
+
+    .secondary-button {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+    }
+
+    .info-item .label {
+      font-size: 0.75rem;
+    }
+
+    .info-item .value {
+      font-size: 1rem;
+    }
+
+    .progress-bar {
+      height: 10px;
+      margin-bottom: 1.5rem;
+    }
+
+    .current-item-card {
+      padding: 1rem;
+    }
+
+    .item-name-large {
+      font-size: 1.5rem;
+      letter-spacing: 0.5px;
+      margin: 0.75rem 0;
+    }
+
+    .item-instruction {
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .status-badge {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.75rem;
+    }
+
+    .item-number {
+      font-size: 0.875rem;
+      padding: 0.4rem 0.75rem;
+    }
+
+    .upload-zone {
+      padding: 1.5rem 1rem;
+    }
+
+    .upload-label {
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      gap: 0.75rem;
+    }
+
+    .upload-icon {
+      font-size: 2rem;
+    }
+
+    .image-preview-large {
+      max-height: 250px;
+    }
+
+    .image-preview-large img {
+      height: 250px;
+    }
+
+    .clear-button {
+      width: 35px;
+      height: 35px;
+      font-size: 1.25rem;
+    }
+
+    .verify-button {
+      font-size: 1rem;
+      padding: 1rem;
+    }
+
+    .message {
+      padding: 0.875rem 1.25rem;
+      font-size: 1rem;
+    }
+
+    .found-message p:first-child {
+      font-size: 1.5rem;
+    }
+
+    .found-time {
+      font-size: 0.875rem;
+    }
+
+    .items-overview {
+      padding: 1rem;
+    }
+
+    .items-overview h4 {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .items-grid-mini {
+      grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+      gap: 0.35rem;
+    }
+
+    .mini-item {
+      font-size: 0.8rem;
+    }
+
+    .completion-message {
+      padding: 1.5rem 1rem;
+    }
+
+    .completion-message h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .completion-message p {
+      font-size: 0.9rem;
+    }
+
+    .primary-button {
+      font-size: 1rem;
+      padding: 0.875rem;
+    }
+
+    .error {
+      font-size: 0.875rem;
+      padding: 0.875rem;
+    }
+  }
+
+  /* Extra small devices */
+  @media (max-width: 360px) {
+    .item-name-large {
+      font-size: 1.25rem;
+    }
+
+    .items-grid-mini {
+      grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
+    }
+
+    .navigation-header {
+      padding: 0.5rem;
+    }
+
+    .nav-button {
+      padding: 0.6rem;
+      font-size: 0.9rem;
+    }
+  }
+
+  /* Landscape orientation optimization */
+  @media (max-height: 600px) and (orientation: landscape) {
+    .challenge-container {
+      padding: 0.5rem;
+    }
+
+    .start-form,
+    .active-challenge {
+      padding: 1rem;
+    }
+
+    .item-name-large {
+      font-size: 1.5rem;
+      margin: 0.5rem 0;
+    }
+
+    .image-preview-large {
+      max-height: 200px;
+    }
+
+    .image-preview-large img {
+      height: 200px;
+    }
+
+    .upload-zone {
+      padding: 1rem;
+      min-height: 150px;
+    }
+
+    .completion-message {
+      padding: 1rem;
+    }
+
+    .items-overview {
+      padding: 0.75rem;
+    }
+  }
 </style>

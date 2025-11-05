@@ -1,8 +1,9 @@
 <script lang="ts">
+  import { goto } from '$app/navigation';
+  import { browser } from '$app/environment';
   import { authStore } from '$lib/stores/auth';
   import { api, APIError } from '$lib/api/api';
-
-  export let onSwitchToLogin: () => void;
+  import { onMount } from 'svelte';
 
   let email = '';
   let password = '';
@@ -10,6 +11,16 @@
   let confirmPassword = '';
   let error = '';
   let loading = false;
+
+  // Redirect if already authenticated
+  onMount(async () => {
+    if (browser) {
+      const isAuth = await authStore.checkAuth();
+      if (isAuth) {
+        goto('/');
+      }
+    }
+  });
 
   async function handleSignup() {
     error = '';
@@ -35,6 +46,7 @@
     try {
       const response = await api.auth.signup({ email, password, name });
       authStore.login(response.token, response.user);
+      goto('/');
     } catch (e) {
       if (e instanceof APIError) {
         error = e.message;
@@ -45,78 +57,99 @@
       loading = false;
     }
   }
+
+  function goToLogin() {
+    goto('/login');
+  }
 </script>
 
-<div class="auth-container">
-  <h1 class="auth-title">Sign Up</h1>
+<div class="page-container">
+  <div class="auth-container">
+    <h1 class="auth-title">Sign Up</h1>
 
-  <form on:submit|preventDefault={handleSignup} class="auth-form">
-    {#if error}
-      <div class="error-message">{error}</div>
-    {/if}
+    <form on:submit|preventDefault={handleSignup} class="auth-form">
+      {#if error}
+        <div class="error-message">{error}</div>
+      {/if}
 
-    <div class="form-group">
-      <label for="name">Name</label>
-      <input
-        type="text"
-        id="name"
-        bind:value={name}
-        required
-        placeholder="Your name"
-        disabled={loading}
-      />
-    </div>
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input
+          type="text"
+          id="name"
+          bind:value={name}
+          required
+          placeholder="Your name"
+          disabled={loading}
+        />
+      </div>
 
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input
-        type="email"
-        id="email"
-        bind:value={email}
-        required
-        placeholder="your@email.com"
-        disabled={loading}
-      />
-    </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          bind:value={email}
+          required
+          placeholder="your@email.com"
+          disabled={loading}
+        />
+      </div>
 
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input
-        type="password"
-        id="password"
-        bind:value={password}
-        required
-        placeholder="At least 6 characters"
-        disabled={loading}
-      />
-    </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          bind:value={password}
+          required
+          placeholder="At least 6 characters"
+          disabled={loading}
+        />
+      </div>
 
-    <div class="form-group">
-      <label for="confirmPassword">Confirm Password</label>
-      <input
-        type="password"
-        id="confirmPassword"
-        bind:value={confirmPassword}
-        required
-        placeholder="Re-enter password"
-        disabled={loading}
-      />
-    </div>
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          bind:value={confirmPassword}
+          required
+          placeholder="Re-enter password"
+          disabled={loading}
+        />
+      </div>
 
-    <button type="submit" class="btn-submit" disabled={loading}>
-      {loading ? 'Creating account...' : 'Sign Up'}
-    </button>
-  </form>
+      <button type="submit" class="btn-submit" disabled={loading}>
+        {loading ? 'Creating account...' : 'Sign Up'}
+      </button>
+    </form>
 
-  <p class="switch-auth">
-    Already have an account?
-    <button type="button" class="link-btn" on:click={onSwitchToLogin}>
-      Login
-    </button>
-  </p>
+    <p class="switch-auth">
+      Already have an account?
+      <button type="button" class="link-btn" on:click={goToLogin}>
+        Login
+      </button>
+    </p>
+  </div>
 </div>
 
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+  .page-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Fredoka One', sans-serif;
+    background-image: url('/Background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    padding: 20px;
+  }
+
   .auth-container {
     background: rgba(40, 25, 5, 0.95);
     border-radius: 25px;
@@ -239,10 +272,13 @@
 
   /* RESPONSIVE DESIGN */
   @media (max-width: 768px) {
+    .page-container {
+      padding: 15px;
+    }
+
     .auth-container {
       padding: 30px 25px;
       max-width: 100%;
-      margin: 20px;
     }
 
     .auth-title {
@@ -274,9 +310,12 @@
   }
 
   @media (max-width: 480px) {
+    .page-container {
+      padding: 10px;
+    }
+
     .auth-container {
       padding: 25px 20px;
-      margin: 15px;
       border-radius: 20px;
     }
 
@@ -315,6 +354,40 @@
     .error-message {
       font-size: 13px;
       padding: 10px;
+    }
+  }
+
+  @media (max-height: 650px) and (orientation: landscape) {
+    .page-container {
+      padding: 10px;
+    }
+
+    .auth-container {
+      padding: 15px 25px;
+    }
+
+    .auth-title {
+      font-size: 26px;
+      margin-bottom: 12px;
+    }
+
+    .auth-form {
+      gap: 10px;
+    }
+
+    .form-group input {
+      padding: 8px 12px;
+    }
+
+    .btn-submit {
+      padding: 10px 0;
+      font-size: 16px;
+      margin-top: 5px;
+    }
+
+    .switch-auth {
+      margin-top: 12px;
+      font-size: 14px;
     }
   }
 </style>
