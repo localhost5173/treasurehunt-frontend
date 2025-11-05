@@ -7,19 +7,31 @@
 </audio>
 
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount } from 'svelte';
+  import { authStore } from '$lib/stores/auth';
+  import Login from '$lib/components/Login.svelte';
+  import Signup from '$lib/components/Signup.svelte';
+  import ImageUpload from '$lib/components/ImageUpload.svelte';
+  import Challenge from '$lib/components/Challenge.svelte';
 
   // PAGE STATE
-  let currentPage = "menu"; // "menu" | "gameSetup" | "settings"
+  let currentPage = "auth"; // "auth" | "menu" | "challenge" | "settings" | "imageAnalyzer"
+  let authMode = "login"; // "login" | "signup"
 
   // SETTINGS STATE
   let soundOn = true;
   let musicOn = true;
   let language = "English";
 
-  // GAME SETUP STATE
-  let objectCount = null;
-  let difficulty = null;
+  $: isAuthenticated = $authStore.isAuthenticated;
+
+  // Check authentication on mount
+  onMount(async () => {
+    const isAuth = await authStore.checkAuth();
+    if (isAuth) {
+      currentPage = "menu";
+    }
+  });
 
   // AUDIO
   let myAudio: HTMLAudioElement | null = null;
@@ -101,16 +113,50 @@
 <!-- MENU PAGE -->
 {#if currentPage === "menu"}
   <div class="container">
+  // Watch for authentication changes
+  $: if (isAuthenticated && currentPage === "auth") {
+    currentPage = "menu";
+  }
+</script>
+
+{#if currentPage === "auth"}
+  <!-- AUTH PAGE -->
+  <div class="container">
+    {#if authMode === "login"}
+      <Login onSwitchToSignup={switchToSignup} />
+    {:else}
+      <Signup onSwitchToLogin={switchToLogin} />
+    {/if}
+  </div>
+
+{:else if currentPage === "menu"}
+<div class="container">
     <h1 class="title">Treasure<br />Hunt</h1>
 
     <div class="menu">
-      <button class="btn" on:click={goToGame}>Play</button>
+      <button class="btn" on:click={goToChallenge}>Play Challenge</button>
+      <button class="btn" on:click={goToImageAnalyzer}>Image Analyzer</button>
       <button class="btn" on:click={openSettings}>Settings</button>
+      <button class="btn" on:click={handleLogout}>Logout</button>
       <button class="btn" on:click={quitGame}>Quit</button>
     </div>
   </div>
 
 <!-- SETTINGS PAGE -->
+{:else if currentPage === "challenge"}
+  <!-- CHALLENGE PAGE -->
+  <div class="challenge-page">
+    <Challenge />
+    <button class="btn back-btn-standalone" on:click={backToMenu}>Back to Menu</button>
+  </div>
+
+{:else if currentPage === "imageAnalyzer"}
+  <!-- IMAGE ANALYZER PAGE -->
+  <div class="container">
+    <ImageUpload />
+    <button class="btn back-btn-standalone" on:click={backToMenu}>Back to Menu</button>
+  </div>
+
 {:else if currentPage === "settings"}
   <div class="settings-container">
     <h1 class="settings-title">Settings</h1>
@@ -159,39 +205,6 @@
     </div>
 
     <button class="btn back-btn" on:click={backToMenu}>Back</button>
-  </div>
-
-<!-- GAME SETUP PAGE -->
-{:else if currentPage === "gameSetup"}
-  <div class="settings-container">
-    <h1 class="settings-title">Game Settings</h1>
-
-    <!-- Number of Objects -->
-    <div class="section">
-      <h2>Number of Objects</h2>
-      <div class="button-group">
-        <button class="btn small" on:click={() => (objectCount = 5)}>5</button>
-        <button class="btn small" on:click={() => (objectCount = 8)}>8</button>
-        <button class="btn small" on:click={() => (objectCount = 10)}>10</button>
-      </div>
-    </div>
-
-    <!-- Difficulty -->
-    <div class="section">
-      <h2>Difficulty</h2>
-      <div class="button-group">
-        <button class="btn small" on:click={() => (difficulty = "Easy")}>Easy</button>
-        <button class="btn small" on:click={() => (difficulty = "Medium")}>Medium</button>
-        <button class="btn small" on:click={() => (difficulty = "Hard")}>Hard</button>
-      </div>
-    </div>
-
-    <button class="btn start-btn" on:click={startGame}>
-      Start Treasure Hunt
-    </button>
-    <div>
-      <button class="btn small back-btn" on:click={backToMenu}>Back</button>
-    </div>
   </div>
 {/if}
 
@@ -364,8 +377,66 @@
   .back-btn {
     margin-top: 20px;
     width: 100px;
+  }
+  /* LANGUAGE BUTTON */
+/* LANGUAGE BUTTON (fixed width, no size jump) */
+.lang-btn {
+  background: linear-gradient(#ffcc33, #ff9900);
+  border: none;
+  border-radius: 20px;
+  padding: 8px 12px;      /* ✅ Added horizontal padding */
+  width: 100px;
+  font-size: 18px;
+  color: #000;
+  cursor: pointer;
+  box-shadow: 0px 4px 0px #cc7a00;
+  transition: transform 0.2s ease;
+  text-align: center;
+  letter-spacing: 0.5px;  /* ✅ Optional: slightly looser text spacing */
+}
+
+.lang-btn {
+  margin-left: 12px; /* ensure the button sits slightly to the right */
+}
+
+.lang-btn:hover {
+  transform: translateY(-2px);
+}
+
+  .back-btn {
+    margin-top: 20px;
+    width: 100px;          /* ✅ Matches other small buttons */
     padding: 10px 0;
     font-size: 18px;
     border-radius: 20px;
+  }
+  
+   .back-btn-standalone {
+    margin-top: 20px;
+    width: 200px;
+    padding: 15px 0;
+    font-size: 20px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    background: linear-gradient(#999, #666);
+    box-shadow: 0px 5px 0px #333;
+    transition: all 0.2s ease;
+    color: #fff;
+  }
+
+  .back-btn-standalone:hover {
+    transform: translateY(-3px);
+  }
+
+  .back-btn-standalone:active {
+    transform: translateY(3px);
+    box-shadow: 0px 0px 0px #333;
+  }
+
+  .challenge-page {
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px;
   }
 </style>
