@@ -108,14 +108,34 @@
     if (musicOn) playAudio();
     else pauseAudio();
   }
-</script>
 
-<!-- MENU PAGE -->
-{#if currentPage === "menu"}
-  <div class="container">
   // Watch for authentication changes
   $: if (isAuthenticated && currentPage === "auth") {
     currentPage = "menu";
+  }
+
+  // Auth mode switching
+  function switchToSignup() {
+    authMode = "signup";
+  }
+
+  function switchToLogin() {
+    authMode = "login";
+  }
+
+  // Navigation functions
+  function goToChallenge() {
+    currentPage = "challenge";
+  }
+
+  function goToImageAnalyzer() {
+    currentPage = "imageAnalyzer";
+  }
+
+  function handleLogout() {
+    authStore.logout();
+    currentPage = "auth";
+    authMode = "login";
   }
 </script>
 
