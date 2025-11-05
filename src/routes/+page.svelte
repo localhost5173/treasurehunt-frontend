@@ -4,19 +4,16 @@
   import Login from '$lib/components/Login.svelte';
   import Signup from '$lib/components/Signup.svelte';
   import ImageUpload from '$lib/components/ImageUpload.svelte';
+  import Challenge from '$lib/components/Challenge.svelte';
 
   // PAGE STATE
-  let currentPage = "auth"; // "auth" | "menu" | "gameSetup" | "settings" | "imageAnalyzer"
+  let currentPage = "auth"; // "auth" | "menu" | "challenge" | "settings" | "imageAnalyzer"
   let authMode = "login"; // "login" | "signup"
 
   // SETTINGS STATE
   let soundOn = true;
   let musicOn = true;
   let language = "English";
-
-  // GAME SETUP STATE
-  let objectCount = null;
-  let difficulty = null;
 
   $: isAuthenticated = $authStore.isAuthenticated;
 
@@ -29,8 +26,8 @@
   });
 
   // Navigation
-  function goToGame() {
-    currentPage = "gameSetup";
+  function goToChallenge() {
+    currentPage = "challenge";
   }
 
   function openSettings() {
@@ -74,10 +71,6 @@
     language = langs[(currentIndex + 1) % langs.length];
   }
 
-  function startGame() {
-    window.location.href = 'gamemenu.html';
-  }
-
   function quitGame() {
     window.close();
   }
@@ -103,12 +96,19 @@
     <h1 class="title">Treasure<br />Hunt</h1>
 
     <div class="menu">
+      <button class="btn" on:click={goToChallenge}>Play Challenge</button>
       <button class="btn" on:click={goToImageAnalyzer}>Image Analyzer</button>
-      <button class="btn" on:click={goToGame}>Play</button>
       <button class="btn" on:click={openSettings}>Settings</button>
       <button class="btn" on:click={handleLogout}>Logout</button>
       <button class="btn" on:click={quitGame}>Quit</button>
     </div>
+  </div>
+
+{:else if currentPage === "challenge"}
+  <!-- CHALLENGE PAGE -->
+  <div class="challenge-page">
+    <Challenge />
+    <button class="btn back-btn-standalone" on:click={backToMenu}>Back to Menu</button>
   </div>
 
 {:else if currentPage === "imageAnalyzer"}
@@ -153,36 +153,6 @@
       <button class="lang-btn" on:click={changeLanguage}>{language}</button>
     </div>
     <button class="btn back-btn" on:click={backToMenu}>Back</button>
-  </div>
-
-{:else if currentPage === "gameSetup"}
-  <!-- GAME SETUP PAGE -->
-  <div class="settings-container">
-    <h1 class="settings-title">Game Settings</h1>
-    <div class="section">
-      <h2>Number of Objects</h2>
-      <div class="button-group">
-        <button class="btn small" on:click={() => (objectCount = 5)}>5</button>
-        <button class="btn small" on:click={() => (objectCount = 8)}>8</button>
-        <button class="btn small" on:click={() => (objectCount = 10)}>10</button>
-      </div>
-    </div>
-
-    <div class="section">
-      <h2>Difficulty</h2>
-      <div class="button-group">
-        <button class="btn small" on:click={() => (difficulty = 'Easy')}>Easy</button>
-        <button class="btn small" on:click={() => (difficulty = 'Medium')}>Medium</button>
-        <button class="btn small" on:click={() => (difficulty = 'Hard')}>Hard</button>
-      </div>
-    </div>
-
-    <button class="btn start-btn" on:click={startGame}>
-      Start Treasure Hunt
-    </button>
-    <div>
-      <button class="btn small back-btn" on:click={backToMenu}>Back</button>
-      </div>
   </div>
 {/if}
 
@@ -401,5 +371,11 @@
   .back-btn-standalone:active {
     transform: translateY(3px);
     box-shadow: 0px 0px 0px #333;
+  }
+
+  .challenge-page {
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px;
   }
 </style>

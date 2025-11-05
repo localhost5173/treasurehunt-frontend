@@ -34,6 +34,42 @@ export interface ImageAnalysisResponse {
 	result: boolean;
 }
 
+export interface ChallengeItem {
+	itemId: number;
+	name: string;
+	found: boolean;
+	foundAt?: string;
+}
+
+export interface Challenge {
+	id: string;
+	userId: string;
+	difficulty: 'easy' | 'medium' | 'hard';
+	totalItems: number;
+	items: ChallengeItem[];
+	completedItems: number;
+	isCompleted: boolean;
+	createdAt: string;
+	updatedAt: string;
+	completedAt?: string;
+}
+
+export interface StartChallengeRequest {
+	difficulty: 'easy' | 'medium' | 'hard';
+	totalItems: number;
+}
+
+export interface VerifyItemRequest {
+	imageUrl?: string;
+	imageBase64?: string;
+}
+
+export interface VerifyItemResponse {
+	found: boolean;
+	message: string;
+	challenge?: Challenge;
+}
+
 export class APIError extends Error {
 	constructor(public status: number, message: string) {
 		super(message);
@@ -95,5 +131,55 @@ export const api = {
 			});
 			return handleResponse<ImageAnalysisResponse>(response);
 		}
+	},
+
+	challenges: {
+		start: async (token: string, data: StartChallengeRequest): Promise<Challenge> => {
+			const response = await fetch(`${API_BASE_URL}/challenges/start`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`
+				},
+				body: JSON.stringify(data)
+			});
+			return handleResponse<Challenge>(response);
+		},
+
+		getAll: async (token: string): Promise<Challenge[]> => {
+			const response = await fetch(`${API_BASE_URL}/challenges`, {
+				headers: {
+					Authorization: `Bearer ${token}`
+				}
+			});
+			return handleResponse<Challenge[]>(response);
+		},
+
+		getById: async (token: string, challengeId: string): Promise<Challenge> => {
+			const response = await fetch(`${API_BASE_URL}/challenges/${challengeId}`, {
+				headers: {
+					Authorization: `Bearer ${token}`
+				}
+			});
+			return handleResponse<Challenge>(response);
+		},
+
+		verifyItem: async (
+			token: string,
+			challengeId: string,
+			itemId: number,
+			data: VerifyItemRequest
+		): Promise<VerifyItemResponse> => {
+			const response = await fetch(`${API_BASE_URL}/challenges/${challengeId}/${itemId}`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`
+				},
+				body: JSON.stringify(data)
+			});
+			return handleResponse<VerifyItemResponse>(response);
+		}
 	}
 };
+
