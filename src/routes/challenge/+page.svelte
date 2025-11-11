@@ -9,6 +9,9 @@
 
   onMount(async () => {
     if (browser) {
+      // Scroll to top when page loads
+      window.scrollTo(0, 0);
+      
       isAuthenticated = await authStore.checkAuth();
       if (!isAuthenticated) {
         goto('/login');
@@ -24,7 +27,7 @@
 {#if isAuthenticated}
   <div class="page-container">
     <div class="challenge-wrapper">
-      <Challenge />
+      <Challenge onQuit={goBack} />
       <button class="btn-back" on:click={goBack}>Back to Menu</button>
     </div>
   </div>
@@ -32,6 +35,13 @@
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+  :global(body) {
+    height: auto !important;
+    min-height: 100vh;
+    display: block !important;
+    overflow-y: auto !important;
+  }
 
   .page-container {
     min-height: 100vh;
