@@ -17,17 +17,12 @@ RUN npm run build
 FROM node:22-bullseye-slim
 WORKDIR /app
 
-# Install npm
-RUN corepack enable && corepack prepare npm@latest --activate
+# Copy built app from adapter-node output
+COPY --from=builder /app/build ./
 
-# Copy built app and package files
-COPY --from=builder /app/build ./build
-COPY --from=builder /app/server.js ./
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/package-lock.json ./
-
-# Install only production dependencies (adapter-node must be in dependencies!)
-RUN npm install --prod --frozen-lockfile
+# Install production dependencies if needed (adapter-node bundles everything)
+ENV NODE_ENV=production
+ENV PORT=3000
 
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["node", "index.js"]
