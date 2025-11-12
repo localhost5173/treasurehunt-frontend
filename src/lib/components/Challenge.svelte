@@ -47,6 +47,13 @@
 	let verifying = false;
 	let message: { type: 'success' | 'error'; text: string } | null = null;
 
+	// Camera capture state
+	let showCamera = false;
+	let videoElement: HTMLVideoElement;
+	let canvasElement: HTMLCanvasElement;
+	let stream: MediaStream | null = null;
+	let cameraError: string = '';
+
 	// Get storage key based on user ID
 	function getStorageKey(): string {
 		const userId = $authStore.user?.id;
@@ -282,6 +289,66 @@
 		imageFile = null;
 		imagePreview = '';
 		message = null;
+		stopCamera();
+	}
+
+	async function startCamera() {
+		cameraError = '';
+		try {
+			stream = await navigator.mediaDevices.getUserMedia({ 
+				video: { facingMode: 'environment' } // Prefer back camera on mobile
+			});
+			if (videoElement) {
+				videoElement.srcObject = stream;
+				showCamera = true;
+			}
+		} catch (err: any) {
+			console.error('Camera access error:', err);
+			cameraError = 'Unable to access camera. Please check permissions or upload an image instead.';
+			showCamera = false;
+		}
+	}
+
+	function stopCamera() {
+		if (stream) {
+			stream.getTracks().forEach(track => track.stop());
+			stream = null;
+		}
+		showCamera = false;
+		cameraError = '';
+	}
+
+	function capturePhoto() {
+		if (!videoElement || !canvasElement) return;
+		
+		const context = canvasElement.getContext('2d');
+		if (!context) return;
+
+		// Set canvas dimensions to match video
+		canvasElement.width = videoElement.videoWidth;
+		canvasElement.height = videoElement.videoHeight;
+
+		// Draw the current video frame to canvas
+		context.drawImage(videoElement, 0, 0);
+
+		// Convert canvas to blob and create file
+		canvasElement.toBlob((blob) => {
+			if (!blob) return;
+			
+			const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
+			imageFile = file;
+			imagePreview = canvasElement.toDataURL('image/jpeg');
+			message = null;
+			stopCamera();
+		}, 'image/jpeg', 0.9);
+	}
+
+	function toggleCamera() {
+		if (showCamera) {
+			stopCamera();
+		} else {
+			startCamera();
+		}
 	}
 
 	$: progress = currentChallenge
@@ -434,19 +501,43 @@
 											✕
 										</button>
 									</div>
+								{:else if showCamera}
+									<div class="camera-container">
+										<!-- svelte-ignore a11y-media-has-caption -->
+										<video bind:this={videoElement} autoplay playsinline class="camera-video"></video>
+										<canvas bind:this={canvasElement} style="display: none;"></canvas>
+										{#if cameraError}
+											<div class="camera-error">{cameraError}</div>
+										{/if}
+										<div class="camera-controls">
+											<button on:click={capturePhoto} class="capture-button" type="button">
+												📸 Capture Photo
+											</button>
+											<button on:click={stopCamera} class="cancel-camera-button" type="button">
+												Cancel
+											</button>
+										</div>
+									</div>
 								{:else}
 									<div class="upload-zone">
-										<input
-											type="file"
-											accept="image/*"
-											on:change={handleFileInput}
-											style="display: none;"
-											id="file-input-current"
-										/>
-										<label for="file-input-current" class="upload-label">
-											<span class="upload-icon">📸</span>
-											<span>Choose Image</span>
-										</label>
+										<div class="upload-options">
+											<button on:click={toggleCamera} class="camera-option-button" type="button">
+												<span class="option-icon">📷</span>
+												<span>Take Photo</span>
+											</button>
+											<div class="or-divider">or</div>
+											<input
+												type="file"
+												accept="image/*"
+												on:change={handleFileInput}
+												style="display: none;"
+												id="file-input-current"
+											/>
+											<label for="file-input-current" class="upload-label">
+												<span class="upload-icon">�</span>
+												<span>Choose Image</span>
+											</label>
+										</div>
 									</div>
 								{/if}
 
@@ -739,6 +830,47 @@
 		background: rgba(102, 126, 234, 0.02);
 	}
 
+	.upload-options {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1.5rem;
+	}
+
+	.camera-option-button {
+		display: inline-flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1rem;
+		padding: 1.5rem 2rem;
+		background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+		color: white;
+		border: none;
+		border-radius: 12px;
+		cursor: pointer;
+		font-size: 1.125rem;
+		font-weight: 600;
+		transition: all 0.2s;
+		min-width: 200px;
+	}
+
+	.camera-option-button:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+	}
+
+	.option-icon {
+		font-size: 3rem;
+	}
+
+	.or-divider {
+		color: #999;
+		font-size: 1rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 2px;
+	}
+
 	.upload-label {
 		display: inline-flex;
 		flex-direction: column;
@@ -752,6 +884,7 @@
 		font-size: 1.125rem;
 		font-weight: 600;
 		transition: all 0.2s;
+		min-width: 200px;
 	}
 
 	.upload-label:hover {
@@ -761,6 +894,73 @@
 
 	.upload-icon {
 		font-size: 3rem;
+	}
+
+	.camera-container {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		background: #000;
+		border-radius: 12px;
+		overflow: hidden;
+		padding: 1rem;
+	}
+
+	.camera-video {
+		width: 100%;
+		max-height: 400px;
+		border-radius: 8px;
+		object-fit: cover;
+	}
+
+	.camera-error {
+		background: #ffebee;
+		color: #c62828;
+		padding: 1rem;
+		border-radius: 8px;
+		text-align: center;
+		font-size: 0.9rem;
+	}
+
+	.camera-controls {
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+	}
+
+	.capture-button {
+		flex: 1;
+		padding: 1rem 1.5rem;
+		background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+		color: white;
+		border: none;
+		border-radius: 8px;
+		font-size: 1.125rem;
+		font-weight: 700;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.capture-button:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+	}
+
+	.cancel-camera-button {
+		padding: 1rem 1.5rem;
+		background: #f44336;
+		color: white;
+		border: none;
+		border-radius: 8px;
+		font-size: 1.125rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.cancel-camera-button:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
 	}
 
 	.image-preview-large {
@@ -1100,10 +1300,32 @@
     .upload-label {
       padding: 1rem 1.5rem;
       font-size: 1rem;
+      min-width: 180px;
     }
 
-    .upload-icon {
+    .camera-option-button {
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+      min-width: 180px;
+    }
+
+    .option-icon {
       font-size: 2.5rem;
+    }
+
+    .camera-video {
+      max-height: 300px;
+    }
+
+    .camera-controls {
+      flex-direction: column;
+    }
+
+    .capture-button,
+    .cancel-camera-button {
+      width: 100%;
+      font-size: 1rem;
+      padding: 0.875rem;
     }
 
     .image-preview-large img {
@@ -1223,10 +1445,34 @@
       padding: 0.75rem 1rem;
       font-size: 0.9rem;
       gap: 0.75rem;
+      min-width: 160px;
     }
 
-    .upload-icon {
+    .camera-option-button {
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      gap: 0.75rem;
+      min-width: 160px;
+    }
+
+    .upload-icon,
+    .option-icon {
       font-size: 2rem;
+    }
+
+    .camera-video {
+      max-height: 250px;
+    }
+
+    .capture-button,
+    .cancel-camera-button {
+      font-size: 0.95rem;
+      padding: 0.8rem;
+    }
+
+    .camera-error {
+      font-size: 0.85rem;
+      padding: 0.875rem;
     }
 
     .image-preview-large {
