@@ -6,7 +6,7 @@ WORKDIR /app
 RUN corepack enable && corepack prepare npm@latest --activate
 
 # Install dependencies first for caching
-COPY package.json npm-lock.yaml ./
+COPY package.json package-lock.json ./
 RUN npm install --frozen-lockfile
 
 # Copy all files and build
@@ -24,7 +24,7 @@ RUN corepack enable && corepack prepare npm@latest --activate
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/server.js ./
 COPY --from=builder /app/package.json ./
-COPY --from=builder /app/npm-lock.yaml ./
+COPY --from=builder /app/package-lock.json ./
 
 # Install only production dependencies (adapter-node must be in dependencies!)
 RUN npm install --prod --frozen-lockfile
