@@ -1,13 +1,41 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 	import { api, type Challenge, type ChallengeItem } from '$lib/api/api';
 	import { authStore } from '$lib/stores/auth';
+
+	// Optional callback when user quits challenge
+	export let onQuit: (() => void) | undefined = undefined;
+
+	// Export functions so parent can call them
+	export function resetChallenge() {
+		currentChallenge = null;
+		showStartForm = true;
+		currentItemIndex = 0;
+		clearImage();
+		error = '';
+		clearChallengeStorage();
+	}
+
+	export function quitChallenge() {
+		currentChallenge = null;
+		showStartForm = true;
+		currentItemIndex = 0;
+		clearImage();
+		clearChallengeStorage();
+		
+		// Call parent's callback if provided
+		if (onQuit) {
+			onQuit();
+		}
+	}
 
 	let currentChallenge: Challenge | null = null;
 	let currentItemIndex = 0;
 	let loading = false;
 	let error = '';
 	let showStartForm = true;
+	let initializing = true; // Add flag for initial load
 
 	// Form state
 	let difficulty: 'easy' | 'medium' | 'hard' = 'easy';
@@ -19,17 +47,41 @@
 	let verifying = false;
 	let message: { type: 'success' | 'error'; text: string } | null = null;
 
-	const STORAGE_KEY = 'treasurehunt_challenge';
+	// Get storage key based on user ID
+	function getStorageKey(): string {
+		const userId = $authStore.user?.id;
+		return userId ? `treasurehunt_challenge_${userId}` : 'treasurehunt_challenge';
+	}
 
 	// Load challenge from localStorage on mount
+	let hasAttemptedLoad = false;
+	
 	onMount(() => {
-		loadChallengeFromStorage();
+		if (browser) {
+			loadChallengeFromStorage();
+			hasAttemptedLoad = true;
+			// Set initializing to false after a short delay to ensure reactivity has processed
+			setTimeout(() => {
+				initializing = false;
+			}, 100);
+		}
 	});
+
+	// Reload challenge when user becomes available (in case it wasn't available on mount)
+	$: if (browser && $authStore.user && !hasAttemptedLoad) {
+		console.log('User became available, attempting to load challenge');
+		loadChallengeFromStorage();
+		hasAttemptedLoad = true;
+		setTimeout(() => {
+			initializing = false;
+		}, 100);
+	}
 
 	function saveChallengeToStorage() {
 		if (currentChallenge) {
+			const storageKey = getStorageKey();
 			localStorage.setItem(
-				STORAGE_KEY,
+				storageKey,
 				JSON.stringify({
 					challenge: currentChallenge,
 					currentItemIndex,
@@ -40,40 +92,64 @@
 	}
 
 	function loadChallengeFromStorage() {
-		const stored = localStorage.getItem(STORAGE_KEY);
+		if (!browser) return;
+		
+		const storageKey = getStorageKey();
+		console.log('Loading challenge with key:', storageKey);
+		const stored = localStorage.getItem(storageKey);
+		console.log('Stored data:', stored ? 'Found' : 'Not found');
+		
 		if (stored) {
 			try {
 				const data = JSON.parse(stored);
+				console.log('Parsed challenge data:', data);
+				// Set challenge first to trigger reactivity
 				currentChallenge = data.challenge;
 				currentItemIndex = data.currentItemIndex || 0;
-				showStartForm = data.showStartForm !== false ? false : false;
+				// If we have a challenge loaded, don't show the start form
+				showStartForm = false;
+				console.log('Challenge loaded successfully. showStartForm:', showStartForm, 'currentChallenge:', currentChallenge);
 			} catch (e) {
 				console.error('Failed to load challenge from storage:', e);
-				localStorage.removeItem(STORAGE_KEY);
 			}
 		}
 	}
 
 	function clearChallengeStorage() {
-		localStorage.removeItem(STORAGE_KEY);
+		const storageKey = getStorageKey();
+		localStorage.removeItem(storageKey);
 	}
 
 	async function startChallenge() {
-		if (!$authStore.token) return;
+		const token = $authStore.token;
+		if (!token) {
+			error = 'Authentication required. Please log in again.';
+			return;
+		}
 
 		loading = true;
 		error = '';
 
 		try {
-			currentChallenge = await api.challenges.start($authStore.token, {
+			console.log('Starting challenge with difficulty:', difficulty, 'items:', totalItems);
+			const challenge = await api.challenges.start(token, {
 				difficulty,
 				totalItems
 			});
-			showStartForm = false;
+			console.log('Challenge started:', challenge);
+			
+			// Update state - set challenge FIRST, then hide form
 			currentItemIndex = 0;
 			clearImage();
+			currentChallenge = challenge;
+			
+			// Wait a tick to ensure reactivity
+			await new Promise(resolve => setTimeout(resolve, 0));
+			
+			showStartForm = false;
 			saveChallengeToStorage();
 		} catch (err: any) {
+			console.error('Start challenge error:', err);
 			error = err.message || 'Failed to start challenge';
 		} finally {
 			loading = false;
@@ -81,7 +157,17 @@
 	}
 
 	async function verifyCurrentItem() {
-		if (!currentChallenge || !imageFile || !$authStore.token) return;
+		if (!currentChallenge || !imageFile) {
+			console.log('Missing challenge or image file');
+			return;
+		}
+
+		const token = $authStore.token;
+		if (!token) {
+			console.error('No authentication token available');
+			message = { type: 'error', text: 'Authentication required. Please log in again.' };
+			return;
+		}
 
 		const currentItem = currentChallenge.items[currentItemIndex];
 		if (!currentItem || currentItem.found) return;
@@ -96,8 +182,9 @@
 				const base64 = e.target?.result as string;
 
 				try {
+					console.log('Verifying item with challenge ID:', currentChallenge!.id, 'Item ID:', currentItem.itemId);
 					const result = await api.challenges.verifyItem(
-						$authStore.token!,
+						token,
 						currentChallenge!.id,
 						currentItem.itemId,
 						{ imageBase64: base64 }
@@ -119,6 +206,7 @@
 						message = { type: 'error', text: result.message };
 					}
 				} catch (err: any) {
+					console.error('Verification error:', err);
 					message = { type: 'error', text: err.message || 'Failed to verify item' };
 				} finally {
 					verifying = false;
@@ -126,6 +214,7 @@
 			};
 			reader.readAsDataURL(imageFile);
 		} catch (err: any) {
+			console.error('Image processing error:', err);
 			message = { type: 'error', text: 'Failed to process image' };
 			verifying = false;
 		}
@@ -195,15 +284,6 @@
 		message = null;
 	}
 
-	function resetChallenge() {
-		currentChallenge = null;
-		showStartForm = true;
-		currentItemIndex = 0;
-		clearImage();
-		error = '';
-		clearChallengeStorage();
-	}
-
 	$: progress = currentChallenge
 		? (currentChallenge.completedItems / currentChallenge.totalItems) * 100
 		: 0;
@@ -215,7 +295,17 @@
 </script>
 
 <div class="challenge-container">
-	{#if showStartForm}
+	{#if initializing}
+		<div class="start-form">
+			<h2>Loading...</h2>
+			<p>Please wait...</p>
+		</div>
+	{:else if loading}
+		<div class="start-form">
+			<h2>Loading Challenge...</h2>
+			<p>Please wait while we prepare your treasure hunt.</p>
+		</div>
+	{:else if showStartForm}
 		<div class="start-form">
 			<h2>Start a New Challenge</h2>
 			<p>Find items in the real world using your camera!</p>
@@ -249,11 +339,17 @@
 				{loading ? 'Starting...' : 'Start Challenge'}
 			</button>
 		</div>
-	{:else if currentChallenge}
+	{:else}
 		<div class="active-challenge">
+			<!-- Action buttons - always visible when not on start form -->
+			<div class="action-buttons-top">
+				<button on:click={resetChallenge} class="secondary-button">New Challenge</button>
+				<button on:click={quitChallenge} class="quit-button">Quit Challenge</button>
+			</div>
+
+			{#if currentChallenge}
 			<div class="challenge-header">
 				<h2>Treasure Hunt Challenge</h2>
-				<button on:click={resetChallenge} class="secondary-button">New Challenge</button>
 			</div>
 
 			<div class="challenge-info">
@@ -400,6 +496,7 @@
 					</div>
 				</div>
 			{/if}
+			{/if}
 		</div>
 	{/if}
 </div>
@@ -472,6 +569,20 @@
 	.challenge-header h2 {
 		margin: 0;
 		color: #333;
+	}
+
+	.action-buttons-top {
+		display: flex;
+		gap: 0.75rem;
+		justify-content: center;
+		margin-bottom: 1.5rem;
+		flex-wrap: wrap;
+	}
+
+	.header-buttons {
+		display: flex;
+		gap: 0.75rem;
+		align-items: center;
 	}
 
 	.challenge-info {
@@ -887,12 +998,28 @@
 		transition: all 0.2s;
 	}
 
-  .secondary-button:hover {
-    background: #667eea;
-    color: white;
-  }
+	.secondary-button:hover {
+		background: #667eea;
+		color: white;
+	}
 
-  /* RESPONSIVE DESIGN */
+	.quit-button {
+		padding: 0.5rem 1rem;
+		background: white;
+		color: #f44336;
+		border: 2px solid #f44336;
+		border-radius: 8px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.quit-button:hover {
+		background: #f44336;
+		color: white;
+	}
+
+	/* RESPONSIVE DESIGN */
   @media (max-width: 768px) {
     .challenge-container {
       padding: 1rem;
@@ -915,6 +1042,19 @@
 
     .challenge-header h2 {
       font-size: 1.5rem;
+    }
+
+    .header-buttons {
+      flex-direction: column;
+      width: 100%;
+      gap: 0.5rem;
+    }
+
+    .secondary-button,
+    .quit-button {
+      width: 100%;
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
     }
 
     .challenge-info {

@@ -9,6 +9,9 @@
 
   onMount(async () => {
     if (browser) {
+      // Scroll to top when page loads
+      window.scrollTo(0, 0);
+      
       isAuthenticated = await authStore.checkAuth();
       if (!isAuthenticated) {
         goto('/login');
@@ -19,19 +22,33 @@
   function goBack() {
     goto('/');
   }
+
+  function goToChallengeLog() {
+    goto('/challenge-log');
+  }
 </script>
 
 {#if isAuthenticated}
   <div class="page-container">
     <div class="challenge-wrapper">
-      <Challenge />
-      <button class="btn-back" on:click={goBack}>Back to Menu</button>
+      <Challenge onQuit={goBack} />
+      <div class="bottom-buttons">
+        <button class="btn-log" on:click={goToChallengeLog}>Challenge Log</button>
+        <button class="btn-back" on:click={goBack}>Back to Menu</button>
+      </div>
     </div>
   </div>
 {/if}
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+  :global(body) {
+    height: auto !important;
+    min-height: 100vh;
+    display: block !important;
+    overflow-y: auto !important;
+  }
 
   .page-container {
     min-height: 100vh;
@@ -54,28 +71,46 @@
     gap: 20px;
   }
 
-  .btn-back {
+  .bottom-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-back,
+  .btn-log {
     width: 200px;
     padding: 15px 0;
     font-size: 20px;
     border: none;
     border-radius: 30px;
     cursor: pointer;
-    background: linear-gradient(#999, #666);
-    box-shadow: 0px 5px 0px #333;
+    box-shadow: 0px 5px 0px;
     transition: all 0.2s ease;
     color: #fff;
     font-family: 'Fredoka One', sans-serif;
-    align-self: center;
   }
 
-  .btn-back:hover {
+  .btn-back {
+    background: linear-gradient(#999, #666);
+    box-shadow: 0px 5px 0px #333;
+  }
+
+  .btn-log {
+    background: linear-gradient(#667eea, #764ba2);
+    box-shadow: 0px 5px 0px #4a2c75;
+  }
+
+  .btn-back:hover,
+  .btn-log:hover {
     transform: translateY(-3px);
   }
 
-  .btn-back:active {
+  .btn-back:active,
+  .btn-log:active {
     transform: translateY(3px);
-    box-shadow: 0px 0px 0px #333;
+    box-shadow: 0px 0px 0px;
   }
 
   /* RESPONSIVE DESIGN */
@@ -88,7 +123,13 @@
       gap: 15px;
     }
 
-    .btn-back {
+    .bottom-buttons {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .btn-back,
+    .btn-log {
       width: 100%;
       max-width: 280px;
       font-size: 18px;
@@ -105,7 +146,8 @@
       gap: 12px;
     }
 
-    .btn-back {
+    .btn-back,
+    .btn-log {
       font-size: 16px;
       padding: 10px 0;
     }
@@ -117,7 +159,8 @@
       align-items: flex-start;
     }
 
-    .btn-back {
+    .btn-back,
+    .btn-log {
       padding: 10px 0;
       font-size: 16px;
     }

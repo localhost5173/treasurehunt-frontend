@@ -85,6 +85,10 @@
     goto('/image-analyzer');
   }
 
+  function goToChallengeLog() {
+    goto('/challenge-log');
+  }
+
   function handleLogout() {
     authStore.logout();
     goto('/login');
@@ -104,7 +108,8 @@
   {#if currentPage === "menu"}
     <h1 class="title">Epic Adventure</h1>
     <div class="menu">
-      <button class="btn" on:click={goToChallenge}>Start Challenge</button>
+      <button class="btn" on:click={goToChallenge}>Play Challenge</button>
+      <button class="btn" on:click={goToChallengeLog}>Challenge Log</button>
       <button class="btn" on:click={goToImageAnalyzer}>Image Analyzer</button>
       <button class="btn" on:click={openSettings}>Settings</button>
       <button class="btn" on:click={handleLogout}>Logout</button>

@@ -94,6 +94,13 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
 
+  :global(body) {
+    height: auto !important;
+    min-height: 100vh;
+    display: block !important;
+    overflow-y: auto !important;
+  }
+
   .page-container {
     min-height: 100vh;
     display: flex;
