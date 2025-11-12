@@ -37,6 +37,12 @@
 	}
 
 	function resumeChallenge(challenge: Challenge) {
+		// If it's a battle challenge, navigate to the battle page
+		if (challenge.battleId) {
+			goto(`/battle/${challenge.battleId}`);
+			return;
+		}
+
 		// Save challenge to localStorage and navigate to challenge page
 		const userId = $authStore.user?.id;
 		const storageKey = userId ? `treasurehunt_challenge_${userId}` : 'treasurehunt_challenge';
@@ -75,10 +81,31 @@
 	}
 
 	function getDuration(startDate: string, endDate?: string): string {
+		// If no end date, challenge is in progress
+		if (!endDate) {
+			return 'In Progress';
+		}
+
 		const start = new Date(startDate);
-		const end = endDate ? new Date(endDate) : new Date();
+		const end = new Date(endDate);
+		
+		// Validate dates
+		if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+			return 'N/A';
+		}
+
 		const diffMs = end.getTime() - start.getTime();
+		
+		// If negative duration, something is wrong
+		if (diffMs < 0) {
+			return 'N/A';
+		}
+
 		const diffMins = Math.floor(diffMs / 60000);
+		
+		if (diffMins < 1) {
+			return '< 1 min';
+		}
 		
 		if (diffMins < 60) {
 			return `${diffMins} min${diffMins !== 1 ? 's' : ''}`;
@@ -86,7 +113,14 @@
 		
 		const hours = Math.floor(diffMins / 60);
 		const mins = diffMins % 60;
-		return `${hours}h ${mins}m`;
+		
+		if (hours < 24) {
+			return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+		}
+		
+		const days = Math.floor(hours / 24);
+		const remainingHours = hours % 24;
+		return remainingHours > 0 ? `${days}d ${remainingHours}h` : `${days}d`;
 	}
 
 	$: filteredChallenges = challenges.filter((c) => {
@@ -181,6 +215,9 @@
 							<span class="difficulty-badge difficulty-{challenge.difficulty}">
 								{challenge.difficulty.toUpperCase()}
 							</span>
+							{#if challenge.battleId}
+								<span class="battle-badge">⚔️ Battle</span>
+							{/if}
 							{#if challenge.isCompleted}
 								<span class="status-badge completed-badge">✓ Completed</span>
 							{:else}
@@ -200,16 +237,6 @@
 									{challenge.completedItems}/{challenge.totalItems}
 								</div>
 								<div class="stat-text">Items Found</div>
-							</div>
-						</div>
-
-						<div class="stat-item">
-							<div class="stat-icon">⏱️</div>
-							<div class="stat-info">
-								<div class="stat-number">
-									{getDuration(challenge.createdAt, challenge.completedAt)}
-								</div>
-								<div class="stat-text">Duration</div>
 							</div>
 						</div>
 
@@ -251,11 +278,11 @@
 					<div class="challenge-actions">
 						{#if !challenge.isCompleted}
 							<button on:click={() => resumeChallenge(challenge)} class="resume-button">
-								Resume Challenge →
+								{challenge.battleId ? 'Go to Battle →' : 'Resume Challenge →'}
 							</button>
 						{:else}
 							<button on:click={() => resumeChallenge(challenge)} class="view-button">
-								View Details
+								{challenge.battleId ? 'View Battle' : 'View Details'}
 							</button>
 						{/if}
 					</div>
@@ -527,6 +554,17 @@
 		color: #c62828;
 	}
 
+	.battle-badge {
+		padding: 0.375rem 0.75rem;
+		border-radius: 6px;
+		font-size: 0.75rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		color: white;
+	}
+
 	.status-badge {
 		padding: 0.375rem 0.75rem;
 		border-radius: 6px;
@@ -548,7 +586,7 @@
 
 	.challenge-stats {
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
+		grid-template-columns: repeat(2, 1fr);
 		gap: 1rem;
 	}
 

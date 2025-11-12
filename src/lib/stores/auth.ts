@@ -7,6 +7,8 @@ export interface User {
 	name: string;
 	googleId?: string;
 	profileImage?: string;
+	isOnline?: boolean;
+	lastActive?: string;
 	createdAt: string;
 	updatedAt: string;
 }
@@ -62,7 +64,7 @@ function createAuthStore() {
 			}
 
 			try {
-				const response = await fetch('http://localhost:8080/api/auth/me', {
+				const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/auth/me`, {
 					headers: {
 						Authorization: `Bearer ${token}`
 					}
