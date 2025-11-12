@@ -1,5 +1,5 @@
 <audio
-  src="epic-adventure-background-music-404457.mp3"
+  src="/epic-adventure-background-music-404457.mp3"
   preload="auto"
   loop
   bind:this={myAudio}>
@@ -12,31 +12,21 @@
   import { browser } from '$app/environment';
   import { authStore } from '$lib/stores/auth';
 
+  // ====== State variables ======
   let currentPage = "menu";
   let soundOn = true;
   let musicOn = true;
-  let language = "English";
+  let myAudio: HTMLAudioElement | null = null;
 
+  // ====== Authentication ======
   $: isAuthenticated = $authStore.isAuthenticated;
 
   onMount(async () => {
     const isAuth = await authStore.checkAuth();
-    if (!isAuth) {
-      goto('/login');
-    }
+    if (!isAuth) goto('/login');
   });
 
-  let myAudio: HTMLAudioElement | null = null;
-
-  onMount(() => {
-    myAudio = new Audio("epic-adventure-background-music-404457.mp3");
-    myAudio.loop = true;
-    myAudio.volume = 0.3;
-    if (musicOn) {
-      playAudio();
-    }
-  });
-
+  // ====== Audio logic ======
   function playAudio() {
     if (myAudio && musicOn) {
       myAudio.play().catch((err) => {
@@ -49,25 +39,32 @@
     if (myAudio) myAudio.pause();
   }
 
+  // Wait for first user interaction to bypass autoplay block
+  onMount(() => {
+    if (myAudio) {
+      myAudio.loop = true;
+      myAudio.volume = 0.3;
+    }
+
+    const handleUserInteraction = () => {
+      if (musicOn) playAudio();
+      window.removeEventListener('click', handleUserInteraction);
+    };
+    window.addEventListener('click', handleUserInteraction);
+  });
+
+  // ====== Settings logic ======
   function toggle(setting: string) {
     if (setting === "sound") {
       soundOn = !soundOn;
     } else if (setting === "music") {
       musicOn = !musicOn;
-      if (musicOn) {
-        playAudio();
-      } else {
-        pauseAudio();
-      }
+      if (musicOn) playAudio();
+      else pauseAudio();
     }
   }
 
-  function changeLanguage() {
-    const langs = ["English", "Spanish", "French", "German"];
-    const currentIndex = langs.indexOf(language);
-    language = langs[(currentIndex + 1) % langs.length];
-  }
-
+  // ====== Page navigation ======
   function openSettings() {
     currentPage = "settings";
   }
@@ -78,16 +75,6 @@
 
   function quitGame() {
     window.close();
-  }
-
-  $: if (myAudio) {
-    if (musicOn) playAudio();
-    else pauseAudio();
-  }
-
-  // Client-side only navigation guard
-  $: if (browser && !isAuthenticated) {
-    goto('/login');
   }
 
   function goToChallenge() {
@@ -102,58 +89,55 @@
     authStore.logout();
     goto('/login');
   }
-</script>
 
-{#if currentPage === "menu"}
-  <div class="container">
-    <h1 class="title">Treasure<br />Hunt</h1>
+  // ====== Reactive checks ======
+  $: if (myAudio) {
+    if (musicOn) playAudio();
+    else pauseAudio();
+  }
+
+  $: if (browser && !isAuthenticated) {
+    goto('/login');
+  }
+</script>
+<div class="container">
+  {#if currentPage === "menu"}
+    <h1 class="title">Epic Adventure</h1>
     <div class="menu">
-      <button class="btn" on:click={goToChallenge}>Play Challenge</button>
+      <button class="btn" on:click={goToChallenge}>Start Challenge</button>
       <button class="btn" on:click={goToImageAnalyzer}>Image Analyzer</button>
       <button class="btn" on:click={openSettings}>Settings</button>
       <button class="btn" on:click={handleLogout}>Logout</button>
-      <button class="btn" on:click={quitGame}>Quit</button>
+      <button class="btn" on:click={quitGame}>Quit Game</button>
     </div>
-  </div>
-{:else if currentPage === "settings"}
-  <div class="settings-container">
-    <h1 class="settings-title">Settings</h1>
-    <div class="settings-option">
-      <div class="icon-text">
-        <span class="icon" class:active={soundOn}>
-          {#if soundOn}🔊{:else}🔇{/if}
-        </span>
-        <span>Sound</span>
+  {:else if currentPage === "settings"}
+    <div class="settings-container">
+      <h2 class="settings-title">Settings</h2>
+      <div class="settings-option">
+        <div class="icon-text">
+          <span class="icon {soundOn ? 'active' : ''}">🔊</span>
+          Sound
+        </div>
+        <button class="toggle-btn {soundOn ? 'on' : ''}" on:click={() => toggle('sound')}>
+          {soundOn ? 'On' : 'Off'}
+        </button>
       </div>
-      <button class="toggle-btn" class:on={soundOn} on:click={() => toggle("sound")}>
-        {soundOn ? "ON" : "OFF"}
-      </button>
-    </div>
-    <div class="settings-option">
-      <div class="icon-text">
-        <span class="icon" class:active={musicOn}>
-          {#if musicOn}🎵{:else}🔕{/if}
-        </span>
-        <span>Music</span>
+      <div class="settings-option">
+        <div class="icon-text">
+          <span class="icon {musicOn ? 'active' : ''}">🎵</span>
+          Music
+        </div>
+        <button class="toggle-btn {musicOn ? 'on' : ''}" on:click={() => toggle('music')}>
+          {musicOn ? 'On' : 'Off'}
+        </button>
       </div>
-      <button class="toggle-btn" class:on={musicOn} on:click={() => toggle("music")}>
-        {musicOn ? "ON" : "OFF"}
-      </button>
+      <button class="btn back-btn" on:click={backToMenu}>Back to Menu</button>
     </div>
-    <div class="settings-option">
-      <div class="icon-text">
-        <span class="icon">🌐</span>
-        <span>Language</span>
-      </div>
-      <button class="lang-btn" on:click={changeLanguage}>{language}</button>
-    </div>
-    <button class="btn back-btn" on:click={backToMenu}>Back</button>
-  </div>
-{/if}
+  {/if}
+</div>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
-
   :global(body) {
     margin: 0;
     padding: 0;
@@ -283,24 +267,6 @@
     box-shadow: 0 0 10px #ff9900;
   }
 
-  .lang-btn {
-    background: linear-gradient(#ffcc33, #ff9900);
-    border: none;
-    border-radius: 20px;
-    padding: 8px 12px;
-    width: 100px;
-    font-size: 18px;
-    color: #000;
-    cursor: pointer;
-    box-shadow: 0px 4px 0px #cc7a00;
-    transition: transform 0.2s ease;
-    font-family: 'Fredoka One', sans-serif;
-  }
-
-  .lang-btn:hover {
-    transform: translateY(-2px);
-  }
-
   .back-btn {
     margin-top: 20px;
     width: 100px;
@@ -347,10 +313,6 @@
       font-size: 16px;
       padding: 6px 12px;
     }
-    .lang-btn {
-      font-size: 16px;
-      width: 90px;
-    }
   }
 
   @media (max-width: 480px) {
@@ -375,10 +337,6 @@
     .toggle-btn {
       font-size: 14px;
       padding: 5px 10px;
-    }
-    .lang-btn {
-      font-size: 14px;
-      width: 80px;
     }
   }
 
