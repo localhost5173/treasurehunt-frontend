@@ -53,6 +53,8 @@
 	let canvasElement: HTMLCanvasElement;
 	let stream: MediaStream | null = null;
 	let cameraError: string = '';
+	let capturedPhoto: string = ''; // Temporary storage for confirmation
+	let showPhotoConfirmation = false;
 
 	// Get storage key based on user ID
 	function getStorageKey(): string {
@@ -289,23 +291,53 @@
 		imageFile = null;
 		imagePreview = '';
 		message = null;
+		capturedPhoto = '';
+		showPhotoConfirmation = false;
 		stopCamera();
 	}
 
 	async function startCamera() {
 		cameraError = '';
+		capturedPhoto = '';
+		showPhotoConfirmation = false;
+		
 		try {
+			// First, show the camera UI (this will mount the video element)
+			showCamera = true;
+			
+			// Wait a tick for the DOM to update and video element to be available
+			await new Promise(resolve => setTimeout(resolve, 50));
+			
+			// Request camera access
 			stream = await navigator.mediaDevices.getUserMedia({ 
-				video: { facingMode: 'environment' } // Prefer back camera on mobile
+				video: { 
+					facingMode: 'environment', // Prefer back camera on mobile
+					width: { ideal: 1920 },
+					height: { ideal: 1080 }
+				} 
 			});
+			
+			// Attach stream to video element
 			if (videoElement) {
 				videoElement.srcObject = stream;
-				showCamera = true;
+				// Wait for video to be ready
+				await new Promise<void>((resolve) => {
+					videoElement.onloadedmetadata = () => {
+						videoElement.play();
+						resolve();
+					};
+				});
 			}
 		} catch (err: any) {
 			console.error('Camera access error:', err);
-			cameraError = 'Unable to access camera. Please check permissions or upload an image instead.';
-			showCamera = false;
+			if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+				cameraError = 'Camera permission denied. Please allow camera access in your browser settings.';
+			} else if (err.name === 'NotFoundError') {
+				cameraError = 'No camera found on this device.';
+			} else {
+				cameraError = 'Unable to access camera. Please try uploading an image instead.';
+			}
+			// Keep showCamera true to display the error message
 		}
 	}
 
@@ -316,13 +348,21 @@
 		}
 		showCamera = false;
 		cameraError = '';
+		capturedPhoto = '';
+		showPhotoConfirmation = false;
 	}
 
 	function capturePhoto() {
-		if (!videoElement || !canvasElement) return;
+		if (!videoElement || !canvasElement) {
+			console.error('Video or canvas element not available');
+			return;
+		}
 		
 		const context = canvasElement.getContext('2d');
-		if (!context) return;
+		if (!context) {
+			console.error('Could not get canvas context');
+			return;
+		}
 
 		// Set canvas dimensions to match video
 		canvasElement.width = videoElement.videoWidth;
@@ -331,16 +371,40 @@
 		// Draw the current video frame to canvas
 		context.drawImage(videoElement, 0, 0);
 
-		// Convert canvas to blob and create file
-		canvasElement.toBlob((blob) => {
-			if (!blob) return;
-			
-			const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
-			imageFile = file;
-			imagePreview = canvasElement.toDataURL('image/jpeg');
-			message = null;
-			stopCamera();
-		}, 'image/jpeg', 0.9);
+		// Get the image as data URL for preview
+		capturedPhoto = canvasElement.toDataURL('image/jpeg', 0.9);
+		
+		// Show confirmation screen
+		showPhotoConfirmation = true;
+	}
+
+	function confirmPhoto() {
+		if (!capturedPhoto) return;
+		
+		// Convert data URL to blob and create file
+		fetch(capturedPhoto)
+			.then(res => res.blob())
+			.then(blob => {
+				const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
+				imageFile = file;
+				imagePreview = capturedPhoto;
+				message = null;
+				stopCamera();
+			})
+			.catch(err => {
+				console.error('Error creating file from captured photo:', err);
+				message = { type: 'error', text: 'Failed to process captured photo' };
+			});
+	}
+
+	function retakePhoto() {
+		capturedPhoto = '';
+		showPhotoConfirmation = false;
+		// Camera stream is still active, so user can take another photo
+	}
+
+	function cancelCamera() {
+		stopCamera();
 	}
 
 	function toggleCamera() {
@@ -503,20 +567,48 @@
 									</div>
 								{:else if showCamera}
 									<div class="camera-container">
-										<!-- svelte-ignore a11y-media-has-caption -->
-										<video bind:this={videoElement} autoplay playsinline class="camera-video"></video>
-										<canvas bind:this={canvasElement} style="display: none;"></canvas>
-										{#if cameraError}
-											<div class="camera-error">{cameraError}</div>
+										{#if showPhotoConfirmation}
+											<!-- Photo confirmation screen -->
+											<div class="photo-confirmation">
+												<h3 class="confirmation-title">Use this photo?</h3>
+												<img src={capturedPhoto} alt="Captured" class="captured-preview" />
+												<div class="confirmation-buttons">
+													<button on:click={retakePhoto} class="retake-button" type="button">
+														🔄 Retake
+													</button>
+													<button on:click={confirmPhoto} class="confirm-button" type="button">
+														✓ Use Photo
+													</button>
+												</div>
+												<button on:click={cancelCamera} class="cancel-link" type="button">
+													Cancel
+												</button>
+											</div>
+										{:else}
+											<!-- Live camera view -->
+											<div class="camera-view">
+												<div class="camera-header">
+													<h3 class="camera-title">Take a Photo</h3>
+													<button on:click={cancelCamera} class="close-camera-button" type="button">
+														✕
+													</button>
+												</div>
+												<!-- svelte-ignore a11y-media-has-caption -->
+												<video bind:this={videoElement} autoplay playsinline class="camera-video"></video>
+												<canvas bind:this={canvasElement} style="display: none;"></canvas>
+												{#if cameraError}
+													<div class="camera-error">{cameraError}</div>
+												{/if}
+												<div class="camera-controls">
+													<div class="capture-button-wrapper">
+														<button on:click={capturePhoto} class="capture-button-camera" type="button" disabled={!!cameraError} aria-label="Capture photo">
+															<span class="capture-inner"></span>
+														</button>
+														<span class="capture-label">Capture</span>
+													</div>
+												</div>
+											</div>
 										{/if}
-										<div class="camera-controls">
-											<button on:click={capturePhoto} class="capture-button" type="button">
-												📸 Capture Photo
-											</button>
-											<button on:click={stopCamera} class="cancel-camera-button" type="button">
-												Cancel
-											</button>
-										</div>
 									</div>
 								{:else}
 									<div class="upload-zone">
@@ -897,53 +989,201 @@
 	}
 
 	.camera-container {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 1000;
+		background: #000;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.camera-view,
+	.photo-confirmation {
+		width: 100%;
+		height: 100%;
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
-		background: #000;
-		border-radius: 12px;
-		overflow: hidden;
+	}
+
+	.camera-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 		padding: 1rem;
+		background: rgba(0, 0, 0, 0.8);
+		color: white;
+	}
+
+	.camera-title {
+		margin: 0;
+		font-size: 1.25rem;
+		color: white;
+	}
+
+	.close-camera-button {
+		background: transparent;
+		border: none;
+		color: white;
+		font-size: 2rem;
+		cursor: pointer;
+		padding: 0;
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s;
+	}
+
+	.close-camera-button:hover {
+		background: rgba(255, 255, 255, 0.1);
+		border-radius: 50%;
 	}
 
 	.camera-video {
+		flex: 1;
 		width: 100%;
-		max-height: 400px;
-		border-radius: 8px;
 		object-fit: cover;
+		background: #000;
 	}
 
 	.camera-error {
 		background: #ffebee;
 		color: #c62828;
 		padding: 1rem;
+		margin: 1rem;
 		border-radius: 8px;
 		text-align: center;
 		font-size: 0.9rem;
 	}
 
 	.camera-controls {
+		padding: 2rem;
+		background: rgba(0, 0, 0, 0.8);
 		display: flex;
-		gap: 1rem;
 		justify-content: center;
+		align-items: center;
 	}
 
-	.capture-button {
+	.capture-button-wrapper {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.capture-button-camera {
+		width: 70px;
+		height: 70px;
+		border-radius: 50%;
+		border: 4px solid white;
+		background: transparent;
+		cursor: pointer;
+		padding: 4px;
+		transition: all 0.2s;
+	}
+
+	.capture-button-camera:active {
+		transform: scale(0.95);
+	}
+
+	.capture-button-camera:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.capture-inner {
+		display: block;
+		width: 100%;
+		height: 100%;
+		border-radius: 50%;
+		background: white;
+	}
+
+	.capture-label {
+		color: white;
+		font-size: 0.875rem;
+		font-weight: 600;
+	}
+
+	.photo-confirmation {
+		background: #000;
+		padding: 1rem;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 1.5rem;
+	}
+
+	.confirmation-title {
+		color: white;
+		font-size: 1.5rem;
+		margin: 0;
+	}
+
+	.captured-preview {
+		max-width: 100%;
+		max-height: 60vh;
+		border-radius: 12px;
+		object-fit: contain;
+	}
+
+	.confirmation-buttons {
+		display: flex;
+		gap: 1rem;
+		width: 100%;
+		max-width: 400px;
+	}
+
+	.retake-button,
+	.confirm-button {
 		flex: 1;
 		padding: 1rem 1.5rem;
-		background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
-		color: white;
 		border: none;
-		border-radius: 8px;
+		border-radius: 12px;
 		font-size: 1.125rem;
 		font-weight: 700;
 		cursor: pointer;
 		transition: all 0.2s;
 	}
 
-	.capture-button:hover {
+	.retake-button {
+		background: #666;
+		color: white;
+	}
+
+	.retake-button:hover {
+		background: #555;
+		transform: translateY(-2px);
+	}
+
+	.confirm-button {
+		background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+		color: white;
+	}
+
+	.confirm-button:hover {
 		transform: translateY(-2px);
 		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+	}
+
+	.cancel-link {
+		background: transparent;
+		border: none;
+		color: #999;
+		cursor: pointer;
+		padding: 0.5rem;
+		font-size: 1rem;
+		text-decoration: underline;
+	}
+
+	.cancel-link:hover {
+		color: #ccc;
 	}
 
 	.cancel-camera-button {
@@ -1328,6 +1568,12 @@
       padding: 0.875rem;
     }
 
+    .use-photo-button,
+    .retake-button {
+      font-size: 1rem;
+      padding: 0.875rem 1.5rem;
+    }
+
     .image-preview-large img {
       height: 300px;
     }
@@ -1473,6 +1719,25 @@
     .camera-error {
       font-size: 0.85rem;
       padding: 0.875rem;
+    }
+
+    .confirmation-preview {
+      max-height: 250px;
+    }
+
+    .confirmation-message {
+      font-size: 1rem;
+      padding: 0.875rem;
+    }
+
+    .confirmation-actions {
+      flex-direction: column;
+    }
+
+    .use-photo-button,
+    .retake-button {
+      font-size: 0.95rem;
+      padding: 0.875rem 1.25rem;
     }
 
     .image-preview-large {
