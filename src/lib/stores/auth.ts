@@ -7,6 +7,8 @@ export interface User {
 	name: string;
 	googleId?: string;
 	profileImage?: string;
+	isOnline?: boolean;
+	lastActive?: string;
 	createdAt: string;
 	updatedAt: string;
 }

@@ -37,6 +37,12 @@
 	}
 
 	function resumeChallenge(challenge: Challenge) {
+		// If it's a battle challenge, navigate to the battle page
+		if (challenge.battleId) {
+			goto(`/battle/${challenge.battleId}`);
+			return;
+		}
+
 		// Save challenge to localStorage and navigate to challenge page
 		const userId = $authStore.user?.id;
 		const storageKey = userId ? `treasurehunt_challenge_${userId}` : 'treasurehunt_challenge';
@@ -209,6 +215,9 @@
 							<span class="difficulty-badge difficulty-{challenge.difficulty}">
 								{challenge.difficulty.toUpperCase()}
 							</span>
+							{#if challenge.battleId}
+								<span class="battle-badge">⚔️ Battle</span>
+							{/if}
 							{#if challenge.isCompleted}
 								<span class="status-badge completed-badge">✓ Completed</span>
 							{:else}
@@ -269,11 +278,11 @@
 					<div class="challenge-actions">
 						{#if !challenge.isCompleted}
 							<button on:click={() => resumeChallenge(challenge)} class="resume-button">
-								Resume Challenge →
+								{challenge.battleId ? 'Go to Battle →' : 'Resume Challenge →'}
 							</button>
 						{:else}
 							<button on:click={() => resumeChallenge(challenge)} class="view-button">
-								View Details
+								{challenge.battleId ? 'View Battle' : 'View Details'}
 							</button>
 						{/if}
 					</div>
@@ -543,6 +552,17 @@
 	.difficulty-hard {
 		background: #ffebee;
 		color: #c62828;
+	}
+
+	.battle-badge {
+		padding: 0.375rem 0.75rem;
+		border-radius: 6px;
+		font-size: 0.75rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		color: white;
 	}
 
 	.status-badge {
