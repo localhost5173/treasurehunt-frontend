@@ -1,4 +1,5 @@
 <script lang="ts">
+	import './layout.css';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -11,11 +12,11 @@
 
 	onMount(() => {
 		authStore.checkAuth();
-		
+
 		// Update online status when user is active
 		if ($authStore.token) {
 			api.friends.updateOnlineStatus($authStore.token, true);
-			
+
 			// Update online status periodically
 			const interval = setInterval(() => {
 				if ($authStore.token) {
@@ -26,6 +27,7 @@
 			// Set offline when leaving
 			return () => {
 				clearInterval(interval);
+
 				if ($authStore.token) {
 					api.friends.updateOnlineStatus($authStore.token, false);
 				}
@@ -37,6 +39,7 @@
 		if ($authStore.token) {
 			api.friends.updateOnlineStatus($authStore.token, false);
 		}
+
 		authStore.logout();
 		goto('/login');
 	}
@@ -55,7 +58,9 @@
 			<div class="nav-links">
 				<a href="/" class:active={$page.url.pathname === '/'}>Home</a>
 				<a href="/challenge" class:active={$page.url.pathname === '/challenge'}>Challenge</a>
-				<a href="/challenge-log" class:active={$page.url.pathname === '/challenge-log'}>Challenge Log</a>
+				<a href="/challenge-log" class:active={$page.url.pathname === '/challenge-log'}
+					>Challenge Log</a
+				>
 				<a href="/friends" class:active={$page.url.pathname === '/friends'}>Friends</a>
 				<div class="nav-right">
 					<Notifications />
@@ -75,7 +80,8 @@
 	:global(body) {
 		margin: 0;
 		padding: 0;
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+		font-family:
+			-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 		min-height: 100vh;
 	}

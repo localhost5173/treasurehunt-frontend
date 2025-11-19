@@ -11,6 +11,12 @@
   import { goto } from '$app/navigation';
   import { browser } from '$app/environment';
   import { authStore } from '$lib/stores/auth';
+  import { Button } from '$lib/components/ui/button';
+  import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
+  import { Switch } from '$lib/components/ui/switch';
+  import { Label } from '$lib/components/ui/label';
+  import { Separator } from '$lib/components/ui/separator';
+  import { Badge } from '$lib/components/ui/badge';
 
   // ====== State variables ======
   let currentPage = "menu";
@@ -108,258 +114,286 @@
     goto('/login');
   }
 </script>
+
 <div class="container">
   {#if currentPage === "menu"}
-    <h1 class="title">Epic Adventure</h1>
-    <div class="menu">
-      <button class="btn" on:click={goToChallenge}>Play Challenge</button>
-      <button class="btn" on:click={goToChallengeLog}>Challenge Log</button>
-      <button class="btn" on:click={goToFriends}>Friends & Battles</button>
-      <button class="btn" on:click={goToImageAnalyzer}>Image Analyzer</button>
-      <button class="btn" on:click={openSettings}>Settings</button>
-      <button class="btn" on:click={handleLogout}>Logout</button>
-      <button class="btn" on:click={quitGame}>Quit Game</button>
+    <div class="header-section">
+      <h1 class="title">Epic Adventure</h1>
+      <Badge variant="secondary" class="version-badge">Treasure Hunt Edition</Badge>
     </div>
+    
+    <Card class="main-menu-card">
+      <CardHeader>
+        <CardTitle class="menu-title">Main Menu</CardTitle>
+        <CardDescription>Choose your adventure</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div class="menu-grid">
+          <Button size="lg" class="menu-button" onclick={goToChallenge}>
+            <span class="button-icon">🎮</span>
+            Play Challenge
+          </Button>
+          <Button size="lg" variant="secondary" class="menu-button" onclick={goToChallengeLog}>
+            <span class="button-icon">📜</span>
+            Challenge Log
+          </Button>
+          <Button size="lg" variant="secondary" class="menu-button" onclick={goToFriends}>
+            <span class="button-icon">👥</span>
+            Friends & Battles
+          </Button>
+          <Button size="lg" variant="secondary" class="menu-button" onclick={goToImageAnalyzer}>
+            <span class="button-icon">📷</span>
+            Image Analyzer
+          </Button>
+          
+          <Separator class="my-4" />
+          
+          <Button size="lg" variant="outline" class="menu-button" onclick={openSettings}>
+            <span class="button-icon">⚙️</span>
+            Settings
+          </Button>
+          <Button size="lg" variant="outline" class="menu-button" onclick={handleLogout}>
+            <span class="button-icon">🚪</span>
+            Logout
+          </Button>
+          <Button size="lg" variant="destructive" class="menu-button" onclick={quitGame}>
+            <span class="button-icon">❌</span>
+            Quit Game
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   {:else if currentPage === "settings"}
-    <div class="settings-container">
-      <h2 class="settings-title">Settings</h2>
-      <div class="settings-option">
-        <div class="icon-text">
-          <span class="icon {soundOn ? 'active' : ''}">🔊</span>
-          Sound
+    <Card class="settings-card">
+      <CardHeader>
+        <CardTitle class="settings-title">⚙️ Settings</CardTitle>
+        <CardDescription>Customize your experience</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div class="settings-content">
+          <div class="setting-item">
+            <div class="setting-info">
+              <Label for="sound-toggle" class="setting-label">
+                <span class="setting-icon">{soundOn ? '🔊' : '🔇'}</span>
+                Sound Effects
+              </Label>
+              <p class="setting-description">Toggle game sound effects</p>
+            </div>
+            <Switch 
+              id="sound-toggle" 
+              checked={soundOn} 
+              onCheckedChange={() => toggle('sound')}
+            />
+          </div>
+          
+          <Separator />
+          
+          <div class="setting-item">
+            <div class="setting-info">
+              <Label for="music-toggle" class="setting-label">
+                <span class="setting-icon">{musicOn ? '🎵' : '🔕'}</span>
+                Background Music
+              </Label>
+              <p class="setting-description">Toggle background music</p>
+            </div>
+            <Switch 
+              id="music-toggle" 
+              checked={musicOn} 
+              onCheckedChange={() => toggle('music')}
+            />
+          </div>
         </div>
-        <button class="toggle-btn {soundOn ? 'on' : ''}" on:click={() => toggle('sound')}>
-          {soundOn ? 'On' : 'Off'}
-        </button>
-      </div>
-      <div class="settings-option">
-        <div class="icon-text">
-          <span class="icon {musicOn ? 'active' : ''}">🎵</span>
-          Music
+        
+        <div class="settings-footer">
+          <Button variant="outline" class="w-full" onclick={backToMenu}>
+            ← Back to Menu
+          </Button>
         </div>
-        <button class="toggle-btn {musicOn ? 'on' : ''}" on:click={() => toggle('music')}>
-          {musicOn ? 'On' : 'Off'}
-        </button>
-      </div>
-      <button class="btn back-btn" on:click={backToMenu}>Back to Menu</button>
-    </div>
+      </CardContent>
+    </Card>
   {/if}
 </div>
 
+
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
-  :global(body) {
-    margin: 0;
-    padding: 0;
-    font-family: 'Fredoka One', sans-serif;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-image: url('Background.jpg');
-    background-size: cover;
-    background-position: center;
-    color: #fff;
-  }
 
   .container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    min-height: calc(100vh - 80px);
+  }
+
+  .header-section {
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
   }
 
   .title {
-    font-size: 70px;
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
     color: #ffcc33;
-    text-shadow: 3px 3px 5px #000;
-    margin-bottom: 20px;
+    text-shadow: 
+      3px 3px 0px #000,
+      4px 4px 0px rgba(0,0,0,0.5),
+      0 0 20px rgba(255, 204, 51, 0.5);
+    margin: 0;
+    animation: titleGlow 2s ease-in-out infinite;
   }
 
-  .menu {
+  @keyframes titleGlow {
+    0%, 100% { text-shadow: 3px 3px 0px #000, 4px 4px 0px rgba(0,0,0,0.5), 0 0 20px rgba(255, 204, 51, 0.5); }
+    50% { text-shadow: 3px 3px 0px #000, 4px 4px 0px rgba(0,0,0,0.5), 0 0 30px rgba(255, 204, 51, 0.8); }
+  }
+
+  :global(.version-badge) {
+    font-family: 'Fredoka One', sans-serif;
+    font-size: 0.875rem;
+  }
+
+  :global(.main-menu-card),
+  :global(.settings-card) {
+    width: 100%;
+    background: rgba(20, 20, 30, 0.95);
+    border: 2px solid rgba(255, 204, 51, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+  }
+
+  :global(.menu-title),
+  :global(.settings-title) {
+    font-family: 'Fredoka One', sans-serif;
+    color: #ffcc33;
+    font-size: 1.875rem;
+  }
+
+  .menu-grid {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
   }
 
-  .btn {
-    width: 200px;
-    padding: 15px 0;
-    font-size: 24px;
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-    background: linear-gradient(#ffcc33, #ff9900);
-    box-shadow: 0px 5px 0px #cc7a00;
-    transition: all 0.2s ease;
-    color: #000;
+  :global(.menu-button) {
+    width: 100%;
     font-family: 'Fredoka One', sans-serif;
+    font-size: 1.125rem;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    transition: all 0.2s ease;
   }
 
-  .btn:hover {
-    transform: translateY(-3px);
+  :global(.menu-button:hover) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 204, 51, 0.4);
   }
 
-  .btn:active {
-    transform: translateY(3px);
-    box-shadow: 0px 0px 0px #cc7a00;
+  :global(.menu-button:active) {
+    transform: translateY(0);
   }
 
-  .settings-container {
-    background: rgba(40, 25, 5, 0.9);
-    border-radius: 25px;
-    padding: 40px 60px;
-    text-align: center;
-    color: #ffcc33;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  .button-icon {
+    font-size: 1.5rem;
   }
 
-  .settings-title {
-    font-size: 50px;
-    margin-bottom: 30px;
+  .settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 
-  .settings-option {
+  .setting-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(60, 35, 10, 0.9);
-    padding: 15px 25px;
-    border-radius: 20px;
-    margin-bottom: 20px;
+    gap: 1rem;
   }
 
-  .icon-text {
+  .setting-info {
+    flex: 1;
+  }
+
+  :global(.setting-label) {
+    font-family: 'Fredoka One', sans-serif;
+    font-size: 1.125rem;
+    color: #ffcc33;
     display: flex;
     align-items: center;
-    font-size: 22px;
-    color: #ffb300;
+    gap: 0.5rem;
+    cursor: pointer;
   }
 
-  .icon {
-    margin-right: 10px;
-    font-size: 26px;
-  }
-
-  .icon.active {
-    animation: pulse 1.2s ease-in-out infinite;
+  .setting-icon {
+    font-size: 1.5rem;
+    animation: pulse 2s ease-in-out infinite;
   }
 
   @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.12); }
-    100% { transform: scale(1); }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
   }
 
-  .toggle-btn {
-    background: linear-gradient(#cc7a00, #994d00);
-    border: 2px solid #ffb300;
-    color: #ffcc33;
-    border-radius: 20px;
-    padding: 8px 16px;
-    font-size: 18px;
-    cursor: pointer;
-    box-shadow: 0 4px 0 #663300;
-    transition: all 0.2s ease;
-    font-family: 'Fredoka One', sans-serif;
+  .setting-description {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0.25rem 0 0 0;
   }
 
-  .toggle-btn:hover {
-    transform: translateY(-2px);
+  .settings-footer {
+    margin-top: 1rem;
   }
 
-  .toggle-btn:active {
-    transform: translateY(2px);
-    box-shadow: 0 0 0 #663300;
+  :global(.w-full) {
+    width: 100%;
   }
 
-  .toggle-btn.on {
-    background: linear-gradient(#ffcc33, #ff9900);
-    color: #000;
-    box-shadow: 0 0 10px #ff9900;
+  :global(.my-4) {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
   }
 
-  .back-btn {
-    margin-top: 20px;
-    width: 100px;
-    padding: 10px 0;
-    font-size: 18px;
-  }
-
-  @media (max-width: 768px) {
+  /* Responsive Design */
+  @media (max-width: 640px) {
     .container {
-      padding: 20px;
-      width: 100%;
-      box-sizing: border-box;
+      padding: 1rem;
     }
-    .title {
-      font-size: 48px;
-      margin-bottom: 15px;
+
+    :global(.menu-button) {
+      font-size: 1rem;
+      height: 3rem;
     }
-    .menu {
-      gap: 12px;
-      width: 100%;
+
+    .button-icon {
+      font-size: 1.25rem;
     }
-    .btn {
-      width: 100%;
-      max-width: 280px;
-      font-size: 20px;
-      padding: 12px 0;
-    }
-    .settings-container {
-      padding: 25px 20px;
-      margin: 20px;
-      width: calc(100% - 40px);
-      box-sizing: border-box;
-    }
-    .settings-title {
-      font-size: 36px;
-    }
-    .settings-option {
-      padding: 12px 15px;
-    }
-    .icon-text {
-      font-size: 18px;
-    }
-    .toggle-btn {
-      font-size: 16px;
-      padding: 6px 12px;
+
+    :global(.menu-title),
+    :global(.settings-title) {
+      font-size: 1.5rem;
     }
   }
 
-  @media (max-width: 480px) {
-    .title {
-      font-size: 38px;
+  @media (max-height: 700px) {
+    .container {
+      gap: 1rem;
     }
-    .btn {
-      font-size: 18px;
-      padding: 10px 0;
-    }
-    .settings-container {
-      padding: 20px 15px;
-      margin: 15px;
-      width: calc(100% - 30px);
-    }
-    .settings-title {
-      font-size: 30px;
-    }
-    .icon-text {
-      font-size: 16px;
-    }
-    .toggle-btn {
-      font-size: 14px;
-      padding: 5px 10px;
-    }
-  }
 
-  @media (max-height: 600px) and (orientation: landscape) {
     .title {
-      font-size: 32px;
-    }
-    .btn {
-      font-size: 16px;
-      padding: 8px 0;
-    }
-    .settings-container {
-      padding: 15px;
+      font-size: clamp(2rem, 8vw, 3.5rem);
     }
   }
 </style>
