@@ -1,11 +1,3 @@
-<audio
-  src="/epic-adventure-background-music-404457.mp3"
-  preload="auto"
-  loop
-  bind:this={myAudio}>
-  <track kind="captions" />
-</audio>
-
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
@@ -115,7 +107,15 @@
   }
 </script>
 
-<div class="container">
+<audio
+  src="/epic-adventure-background-music-404457.mp3"
+  preload="auto"
+  loop
+  bind:this={myAudio}>
+  <track kind="captions" />
+</audio>
+
+<div class="container-wrapper">
   {#if currentPage === "menu"}
     <div class="header-section">
       <h1 class="title">Epic Adventure</h1>
@@ -131,34 +131,30 @@
         <div class="menu-grid">
           <Button size="lg" class="menu-button" onclick={goToChallenge}>
             <span class="button-icon">🎮</span>
-            Play Challenge
+            <span>Play Challenge</span>
           </Button>
           <Button size="lg" variant="secondary" class="menu-button" onclick={goToChallengeLog}>
             <span class="button-icon">📜</span>
-            Challenge Log
+            <span>Challenge Log</span>
           </Button>
           <Button size="lg" variant="secondary" class="menu-button" onclick={goToFriends}>
             <span class="button-icon">👥</span>
-            Friends & Battles
+            <span>Friends & Battles</span>
           </Button>
           <Button size="lg" variant="secondary" class="menu-button" onclick={goToImageAnalyzer}>
             <span class="button-icon">📷</span>
-            Image Analyzer
+            <span>Image Analyzer</span>
           </Button>
           
           <Separator class="my-4" />
           
           <Button size="lg" variant="outline" class="menu-button" onclick={openSettings}>
             <span class="button-icon">⚙️</span>
-            Settings
-          </Button>
-          <Button size="lg" variant="outline" class="menu-button" onclick={handleLogout}>
-            <span class="button-icon">🚪</span>
-            Logout
+            <span>Settings</span>
           </Button>
           <Button size="lg" variant="destructive" class="menu-button" onclick={quitGame}>
             <span class="button-icon">❌</span>
-            Quit Game
+            <span>Quit Game</span>
           </Button>
         </div>
       </CardContent>
@@ -175,7 +171,7 @@
             <div class="setting-info">
               <Label for="sound-toggle" class="setting-label">
                 <span class="setting-icon">{soundOn ? '🔊' : '🔇'}</span>
-                Sound Effects
+                <span>Sound Effects</span>
               </Label>
               <p class="setting-description">Toggle game sound effects</p>
             </div>
@@ -192,7 +188,7 @@
             <div class="setting-info">
               <Label for="music-toggle" class="setting-label">
                 <span class="setting-icon">{musicOn ? '🎵' : '🔕'}</span>
-                Background Music
+                <span>Background Music</span>
               </Label>
               <p class="setting-description">Toggle background music</p>
             </div>
@@ -214,21 +210,27 @@
   {/if}
 </div>
 
-
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
 
-  .container {
+  .container-wrapper {
     width: 100%;
     max-width: 600px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2rem;
-    min-height: calc(100vh - 80px);
+    gap: 1.5rem;
+    min-height: calc(100vh - 4rem);
+  }
+
+  @media (min-width: 640px) {
+    .container-wrapper {
+      padding: 2rem;
+      gap: 2rem;
+    }
   }
 
   .header-section {
@@ -237,27 +239,35 @@
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
+    padding: 0 1rem;
   }
 
   .title {
-    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    font-size: clamp(2rem, 10vw, 4.5rem);
     color: #ffcc33;
     text-shadow: 
-      3px 3px 0px #000,
-      4px 4px 0px rgba(0,0,0,0.5),
+      2px 2px 0px #000,
+      3px 3px 0px rgba(0,0,0,0.5),
       0 0 20px rgba(255, 204, 51, 0.5);
     margin: 0;
     animation: titleGlow 2s ease-in-out infinite;
+    line-height: 1.2;
   }
 
   @keyframes titleGlow {
-    0%, 100% { text-shadow: 3px 3px 0px #000, 4px 4px 0px rgba(0,0,0,0.5), 0 0 20px rgba(255, 204, 51, 0.5); }
-    50% { text-shadow: 3px 3px 0px #000, 4px 4px 0px rgba(0,0,0,0.5), 0 0 30px rgba(255, 204, 51, 0.8); }
+    0%, 100% { text-shadow: 2px 2px 0px #000, 3px 3px 0px rgba(0,0,0,0.5), 0 0 20px rgba(255, 204, 51, 0.5); }
+    50% { text-shadow: 2px 2px 0px #000, 3px 3px 0px rgba(0,0,0,0.5), 0 0 30px rgba(255, 204, 51, 0.8); }
   }
 
   :global(.version-badge) {
     font-family: 'Fredoka One', sans-serif;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    :global(.version-badge) {
+      font-size: 0.875rem;
+    }
   }
 
   :global(.main-menu-card),
@@ -273,7 +283,14 @@
   :global(.settings-title) {
     font-family: 'Fredoka One', sans-serif;
     color: #ffcc33;
-    font-size: 1.875rem;
+    font-size: 1.5rem;
+  }
+
+  @media (min-width: 640px) {
+    :global(.menu-title),
+    :global(.settings-title) {
+      font-size: 1.875rem;
+    }
   }
 
   .menu-grid {
@@ -286,13 +303,20 @@
   :global(.menu-button) {
     width: 100%;
     font-family: 'Fredoka One', sans-serif;
-    font-size: 1.125rem;
-    height: 3.5rem;
+    font-size: 1rem;
+    height: 3rem;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
     transition: all 0.2s ease;
+  }
+
+  @media (min-width: 640px) {
+    :global(.menu-button) {
+      font-size: 1.125rem;
+      height: 3.5rem;
+    }
   }
 
   :global(.menu-button:hover) {
@@ -305,7 +329,14 @@
   }
 
   .button-icon {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  @media (min-width: 640px) {
+    .button-icon {
+      font-size: 1.5rem;
+    }
   }
 
   .settings-content {
@@ -324,11 +355,12 @@
 
   .setting-info {
     flex: 1;
+    min-width: 0;
   }
 
   :global(.setting-label) {
     font-family: 'Fredoka One', sans-serif;
-    font-size: 1.125rem;
+    font-size: 1rem;
     color: #ffcc33;
     display: flex;
     align-items: center;
@@ -336,9 +368,22 @@
     cursor: pointer;
   }
 
+  @media (min-width: 640px) {
+    :global(.setting-label) {
+      font-size: 1.125rem;
+    }
+  }
+
   .setting-icon {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     animation: pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @media (min-width: 640px) {
+    .setting-icon {
+      font-size: 1.5rem;
+    }
   }
 
   @keyframes pulse {
@@ -348,9 +393,15 @@
 
   .setting-description {
     font-family: system-ui, -apple-system, sans-serif;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.6);
     margin: 0.25rem 0 0 0;
+  }
+
+  @media (min-width: 640px) {
+    .setting-description {
+      font-size: 0.875rem;
+    }
   }
 
   .settings-footer {
@@ -366,34 +417,12 @@
     margin-bottom: 1rem;
   }
 
-  /* Responsive Design */
-  @media (max-width: 640px) {
-    .container {
-      padding: 1rem;
-    }
-
-    :global(.menu-button) {
-      font-size: 1rem;
-      height: 3rem;
-    }
-
-    .button-icon {
-      font-size: 1.25rem;
-    }
-
-    :global(.menu-title),
-    :global(.settings-title) {
-      font-size: 1.5rem;
-    }
-  }
-
-  @media (max-height: 700px) {
-    .container {
-      gap: 1rem;
-    }
-
-    .title {
-      font-size: clamp(2rem, 8vw, 3.5rem);
+  /* Touch improvements for mobile */
+  @media (hover: none) and (pointer: coarse) {
+    :global(.menu-button),
+    :global(button) {
+      min-height: 44px;
+      min-width: 44px;
     }
   }
 </style>
