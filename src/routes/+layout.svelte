@@ -160,11 +160,11 @@
 								{/if}
 							</SheetDescription>
 						</SheetHeader>
-						<div class="flex flex-col gap-3 mt-6">
+						<div class="flex flex-col gap-3 mt-6 px-4">
 							<Button 
 								variant={isActive('/') ? 'default' : 'outline'} 
 								size="lg"
-								class="w-full justify-start"
+								class="justify-start max-w-full"
 								onclick={() => navigateTo('/')}
 							>
 								<span class="mr-2">🏠</span> Home
@@ -172,7 +172,7 @@
 							<Button 
 								variant={isActive('/challenge') ? 'default' : 'outline'} 
 								size="lg"
-								class="w-full justify-start"
+								class="justify-start max-w-full"
 								onclick={() => navigateTo('/challenge')}
 							>
 								<span class="mr-2">🎮</span> Challenge
@@ -180,7 +180,7 @@
 							<Button 
 								variant={isActive('/challenge-log') ? 'default' : 'outline'} 
 								size="lg"
-								class="w-full justify-start"
+								class="justify-start max-w-full"
 								onclick={() => navigateTo('/challenge-log')}
 							>
 								<span class="mr-2">📜</span> Challenge Log
@@ -188,7 +188,7 @@
 							<Button 
 								variant={isActive('/friends') ? 'default' : 'outline'} 
 								size="lg"
-								class="w-full justify-start"
+								class="justify-start max-w-full"
 								onclick={() => navigateTo('/friends')}
 							>
 								<span class="mr-2">👥</span> Friends
@@ -199,7 +199,7 @@
 							<Button 
 								variant="destructive" 
 								size="lg"
-								class="w-full justify-start"
+								class="justify-start max-w-full"
 								onclick={handleLogout}
 							>
 								<span class="mr-2">🚪</span> Logout

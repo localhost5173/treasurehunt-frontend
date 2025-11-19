@@ -4,8 +4,17 @@
 	import { api } from '$lib/api/api';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { Button } from '$lib/components/ui/button';
+	import { Badge } from '$lib/components/ui/badge';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
+	import {
+		Popover,
+		PopoverContent,
+		PopoverTrigger
+	} from '$lib/components/ui/popover';
+	import { Separator } from '$lib/components/ui/separator';
 
-	let showDropdown = false;
+	let showDropdown = $state(false);
 
 	onMount(() => {
 		if ($authStore.token) {
@@ -19,12 +28,11 @@
 		}
 	});
 
-	function toggleDropdown() {
-		showDropdown = !showDropdown;
+	$effect(() => {
 		if (showDropdown) {
 			notificationStore.fetchNotifications();
 		}
-	}
+	});
 
 	async function handleNotificationClick(notification: any) {
 		await notificationStore.markAsRead(notification.id);
@@ -56,214 +64,79 @@
 		if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
 		return date.toLocaleDateString();
 	}
+
+	function getNotificationIcon(type: string): string {
+		switch (type) {
+			case 'friend_request': return '👥';
+			case 'battle_invite': return '⚔️';
+			case 'battle_accept': return '✅';
+			case 'friend_accept': return '🤝';
+			default: return '📬';
+		}
+	}
 </script>
 
-<div class="notifications-container">
-	<button class="notification-bell" on:click={toggleDropdown}>
-		🔔
-		{#if $notificationStore.unreadCount > 0}
-			<span class="badge">{$notificationStore.unreadCount}</span>
-		{/if}
-	</button>
+<Popover bind:open={showDropdown}>
+	<PopoverTrigger class="relative">
+		<button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-10 w-10 relative">
+			<span class="text-xl">🔔</span>
+			{#if $notificationStore.unreadCount > 0}
+				<Badge 
+					variant="destructive" 
+					class="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
+				>
+					{$notificationStore.unreadCount}
+				</Badge>
+			{/if}
+		</button>
+	</PopoverTrigger>
+	<PopoverContent class="w-[calc(100vw-2rem)] max-w-[380px] p-0" align="end" sideOffset={8}>
+		<div class="flex items-center justify-between p-4 border-b">
+			<h3 class="font-semibold text-base">Notifications</h3>
+			{#if $notificationStore.notifications.length > 0}
+				<Button variant="ghost" size="sm" onclick={markAllAsRead} class="h-auto p-1 text-xs">
+					Mark all read
+				</Button>
+			{/if}
+		</div>
 
-	{#if showDropdown}
-		<div class="notification-dropdown">
-			<div class="dropdown-header">
-				<h3>Notifications</h3>
-				{#if $notificationStore.notifications.length > 0}
-					<button class="mark-all-btn" on:click={markAllAsRead}>Mark all read</button>
-				{/if}
-			</div>
-
-			<div class="notifications-list">
+		<ScrollArea class="h-[min(400px,60vh)]">
+			<div class="flex flex-col">
 				{#if $notificationStore.loading}
-					<div class="loading">Loading...</div>
+					<div class="p-8 text-center text-sm text-muted-foreground">
+						Loading...
+					</div>
 				{:else if $notificationStore.notifications.length === 0}
-					<div class="empty-state">No notifications yet</div>
+					<div class="p-8 text-center text-sm text-muted-foreground">
+						No notifications yet
+					</div>
 				{:else}
 					{#each $notificationStore.notifications as notification (notification.id)}
-						<div
-							class="notification-item"
-							class:unread={!notification.isRead}
-							on:click={() => handleNotificationClick(notification)}
-							on:keydown={(e) => e.key === 'Enter' && handleNotificationClick(notification)}
-							role="button"
-							tabindex="0"
+						<button
+							class="flex items-start gap-3 p-3 text-left transition-colors hover:bg-muted border-b last:border-b-0 {!notification.isRead ? 'bg-primary/5' : ''}"
+							onclick={() => handleNotificationClick(notification)}
 						>
-							<div class="notification-content">
-								<div class="notification-icon">
-									{#if notification.type === 'friend_request'}
-										👥
-									{:else if notification.type === 'battle_invite'}
-										⚔️
-									{:else if notification.type === 'battle_accept'}
-										✅
-									{:else if notification.type === 'friend_accept'}
-										🤝
-									{/if}
-								</div>
-								<div class="notification-text">
-									<p class="notification-from">
-										{notification.fromUserData?.name || 'Someone'}
-									</p>
-									<p class="notification-message">{notification.message}</p>
-									<span class="notification-time">{formatTimeAgo(notification.createdAt)}</span>
-								</div>
+							<div class="text-2xl flex-shrink-0 mt-1">
+								{getNotificationIcon(notification.type)}
+							</div>
+							<div class="flex-1 min-w-0 space-y-1">
+								<p class="text-sm font-semibold text-foreground truncate">
+									{notification.fromUserData?.name || 'Someone'}
+								</p>
+								<p class="text-sm text-muted-foreground line-clamp-2">
+									{notification.message}
+								</p>
+								<span class="text-xs text-muted-foreground">
+									{formatTimeAgo(notification.createdAt)}
+								</span>
 							</div>
 							{#if !notification.isRead}
-								<div class="unread-dot"></div>
+								<div class="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-2"></div>
 							{/if}
-						</div>
+						</button>
 					{/each}
 				{/if}
 			</div>
-		</div>
-	{/if}
-</div>
-
-<style>
-	.notifications-container {
-		position: relative;
-	}
-
-	.notification-bell {
-		position: relative;
-		background: transparent;
-		border: none;
-		font-size: 1.5rem;
-		cursor: pointer;
-		padding: 0.5rem;
-		transition: transform 0.2s;
-	}
-
-	.notification-bell:hover {
-		transform: scale(1.1);
-	}
-
-	.badge {
-		position: absolute;
-		top: 0;
-		right: 0;
-		background-color: #f44336;
-		color: white;
-		border-radius: 10px;
-		padding: 0.125rem 0.375rem;
-		font-size: 0.75rem;
-		font-weight: bold;
-		min-width: 18px;
-		text-align: center;
-	}
-
-	.notification-dropdown {
-		position: absolute;
-		top: 100%;
-		right: 0;
-		margin-top: 0.5rem;
-		width: 380px;
-		max-height: 500px;
-		background: white;
-		border-radius: 8px;
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-		z-index: 1000;
-		overflow: hidden;
-	}
-
-	.dropdown-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 1rem;
-		border-bottom: 1px solid #eee;
-	}
-
-	.dropdown-header h3 {
-		margin: 0;
-		font-size: 1.125rem;
-		color: #333;
-	}
-
-	.mark-all-btn {
-		background: transparent;
-		border: none;
-		color: #667eea;
-		font-size: 0.875rem;
-		cursor: pointer;
-		padding: 0.25rem 0.5rem;
-	}
-
-	.mark-all-btn:hover {
-		text-decoration: underline;
-	}
-
-	.notifications-list {
-		max-height: 400px;
-		overflow-y: auto;
-	}
-
-	.loading,
-	.empty-state {
-		padding: 2rem;
-		text-align: center;
-		color: #666;
-	}
-
-	.notification-item {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 1rem;
-		border-bottom: 1px solid #eee;
-		cursor: pointer;
-		transition: background-color 0.2s;
-	}
-
-	.notification-item:hover {
-		background-color: #f5f5f5;
-	}
-
-	.notification-item.unread {
-		background-color: #f0f4ff;
-	}
-
-	.notification-content {
-		display: flex;
-		gap: 0.75rem;
-		flex: 1;
-	}
-
-	.notification-icon {
-		font-size: 1.5rem;
-		flex-shrink: 0;
-	}
-
-	.notification-text {
-		flex: 1;
-		min-width: 0;
-	}
-
-	.notification-from {
-		margin: 0 0 0.25rem 0;
-		font-weight: 600;
-		color: #333;
-		font-size: 0.875rem;
-	}
-
-	.notification-message {
-		margin: 0 0 0.25rem 0;
-		color: #666;
-		font-size: 0.875rem;
-	}
-
-	.notification-time {
-		font-size: 0.75rem;
-		color: #999;
-	}
-
-	.unread-dot {
-		width: 8px;
-		height: 8px;
-		background-color: #667eea;
-		border-radius: 50%;
-		flex-shrink: 0;
-	}
-</style>
+		</ScrollArea>
+	</PopoverContent>
+</Popover>
