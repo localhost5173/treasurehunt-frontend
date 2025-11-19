@@ -71,8 +71,9 @@
     currentPage = "menu";
   }
 
-  function quitGame() {
-    window.close();
+  function handleLogout() {
+    authStore.logout();
+    goto('/login');
   }
 
   function goToChallenge() {
@@ -89,11 +90,6 @@
 
   function goToFriends() {
     goto('/friends');
-  }
-
-  function handleLogout() {
-    authStore.logout();
-    goto('/login');
   }
 
   // ====== Reactive checks ======
@@ -117,44 +113,65 @@
 
 <div class="container-wrapper">
   {#if currentPage === "menu"}
-    <div class="header-section">
-      <h1 class="title">Epic Adventure</h1>
-      <Badge variant="secondary" class="version-badge">Treasure Hunt Edition</Badge>
-    </div>
-    
+  
     <Card class="main-menu-card">
-      <CardHeader>
-        <CardTitle class="menu-title">Main Menu</CardTitle>
-        <CardDescription>Choose your adventure</CardDescription>
-      </CardHeader>
-      <CardContent>
+      <CardContent class="pt-6">
         <div class="menu-grid">
-          <Button size="lg" class="menu-button" onclick={goToChallenge}>
-            <span class="button-icon">🎮</span>
+          <!-- Primary CTA -->
+          <Button size="lg" class="menu-button cta-button" onclick={goToChallenge}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="button-icon">
+              <path d="M17.5 7.5a5 5 0 1 0-9 0L6 14"/>
+              <path d="M18 14a5 5 0 1 0-11.9 0"/>
+              <path d="M9.7 17.7a5 5 0 0 0 4.6 0"/>
+            </svg>
             <span>Play Challenge</span>
           </Button>
+          
+          <!-- Secondary Actions -->
           <Button size="lg" variant="secondary" class="menu-button" onclick={goToChallengeLog}>
-            <span class="button-icon">📜</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="button-icon">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" x2="8" y1="13" y2="13"/>
+              <line x1="16" x2="8" y1="17" y2="17"/>
+              <line x1="10" x2="8" y1="9" y2="9"/>
+            </svg>
             <span>Challenge Log</span>
           </Button>
           <Button size="lg" variant="secondary" class="menu-button" onclick={goToFriends}>
-            <span class="button-icon">👥</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="button-icon">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
             <span>Friends & Battles</span>
           </Button>
           <Button size="lg" variant="secondary" class="menu-button" onclick={goToImageAnalyzer}>
-            <span class="button-icon">📷</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="button-icon">
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+              <circle cx="9" cy="9" r="2"/>
+              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+            </svg>
             <span>Image Analyzer</span>
           </Button>
           
           <Separator class="my-4" />
           
           <Button size="lg" variant="outline" class="menu-button" onclick={openSettings}>
-            <span class="button-icon">⚙️</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="button-icon">
+              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
             <span>Settings</span>
           </Button>
-          <Button size="lg" variant="destructive" class="menu-button" onclick={quitGame}>
-            <span class="button-icon">❌</span>
-            <span>Quit Game</span>
+          <Button size="lg" variant="destructive" class="menu-button" onclick={handleLogout}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="button-icon">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" x2="9" y1="12" y2="12"/>
+            </svg>
+            <span>Logout</span>
           </Button>
         </div>
       </CardContent>
@@ -162,7 +179,13 @@
   {:else if currentPage === "settings"}
     <Card class="settings-card">
       <CardHeader>
-        <CardTitle class="settings-title">⚙️ Settings</CardTitle>
+        <CardTitle class="settings-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline mr-2">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          Settings
+        </CardTitle>
         <CardDescription>Customize your experience</CardDescription>
       </CardHeader>
       <CardContent>
@@ -170,7 +193,17 @@
           <div class="setting-item">
             <div class="setting-info">
               <Label for="sound-toggle" class="setting-label">
-                <span class="setting-icon">{soundOn ? '🔊' : '🔇'}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="setting-icon">
+                  {#if soundOn}
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                  {:else}
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                    <line x1="22" x2="16" y1="9" y2="15"/>
+                    <line x1="16" x2="22" y1="9" y2="15"/>
+                  {/if}
+                </svg>
                 <span>Sound Effects</span>
               </Label>
               <p class="setting-description">Toggle game sound effects</p>
@@ -187,7 +220,18 @@
           <div class="setting-item">
             <div class="setting-info">
               <Label for="music-toggle" class="setting-label">
-                <span class="setting-icon">{musicOn ? '🎵' : '🔕'}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="setting-icon">
+                  {#if musicOn}
+                    <path d="M9 18V5l12-2v13"/>
+                    <circle cx="6" cy="18" r="3"/>
+                    <circle cx="18" cy="16" r="3"/>
+                  {:else}
+                    <path d="M9 18V5l12-2v13"/>
+                    <circle cx="6" cy="18" r="3"/>
+                    <circle cx="18" cy="16" r="3"/>
+                    <line x1="2" x2="22" y1="2" y2="22"/>
+                  {/if}
+                </svg>
                 <span>Background Music</span>
               </Label>
               <p class="setting-description">Toggle background music</p>
@@ -223,7 +267,7 @@
     align-items: center;
     justify-content: center;
     gap: 1.5rem;
-    min-height: calc(100vh - 4rem);
+    min-height: 100vh;
   }
 
   @media (min-width: 640px) {
@@ -231,32 +275,6 @@
       padding: 2rem;
       gap: 2rem;
     }
-  }
-
-  .header-section {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0 1rem;
-  }
-
-  .title {
-    font-size: clamp(2rem, 10vw, 4.5rem);
-    color: #ffcc33;
-    text-shadow: 
-      2px 2px 0px #000,
-      3px 3px 0px rgba(0,0,0,0.5),
-      0 0 20px rgba(255, 204, 51, 0.5);
-    margin: 0;
-    animation: titleGlow 2s ease-in-out infinite;
-    line-height: 1.2;
-  }
-
-  @keyframes titleGlow {
-    0%, 100% { text-shadow: 2px 2px 0px #000, 3px 3px 0px rgba(0,0,0,0.5), 0 0 20px rgba(255, 204, 51, 0.5); }
-    50% { text-shadow: 2px 2px 0px #000, 3px 3px 0px rgba(0,0,0,0.5), 0 0 30px rgba(255, 204, 51, 0.8); }
   }
 
   :global(.version-badge) {
@@ -273,21 +291,21 @@
   :global(.main-menu-card),
   :global(.settings-card) {
     width: 100%;
-    background: rgba(20, 20, 30, 0.95);
-    border: 2px solid rgba(255, 204, 51, 0.3);
+    background: rgba(15, 23, 42, 0.98);
+    border: 2px solid rgba(59, 130, 246, 0.3);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(10px);
   }
 
-  :global(.menu-title),
   :global(.settings-title) {
     font-family: 'Fredoka One', sans-serif;
-    color: #ffcc33;
+    color: rgb(96, 165, 250);
     font-size: 1.5rem;
+    display: flex;
+    align-items: center;
   }
 
   @media (min-width: 640px) {
-    :global(.menu-title),
     :global(.settings-title) {
       font-size: 1.875rem;
     }
@@ -312,16 +330,36 @@
     transition: all 0.2s ease;
   }
 
+  :global(.cta-button) {
+    background: linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(37, 99, 235) 100%);
+    color: white;
+    font-size: 1.25rem;
+    height: 4rem;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+    border: 2px solid rgba(96, 165, 250, 0.5);
+  }
+
+  :global(.cta-button:hover) {
+    background: linear-gradient(135deg, rgb(96, 165, 250) 0%, rgb(59, 130, 246) 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 24px rgba(59, 130, 246, 0.6);
+  }
+
   @media (min-width: 640px) {
     :global(.menu-button) {
       font-size: 1.125rem;
       height: 3.5rem;
     }
+    
+    :global(.cta-button) {
+      font-size: 1.375rem;
+      height: 4.5rem;
+    }
   }
 
   :global(.menu-button:hover) {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 204, 51, 0.4);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
   }
 
   :global(.menu-button:active) {
@@ -329,14 +367,12 @@
   }
 
   .button-icon {
-    font-size: 1.25rem;
     flex-shrink: 0;
   }
 
-  @media (min-width: 640px) {
-    .button-icon {
-      font-size: 1.5rem;
-    }
+  :global(.cta-button .button-icon) {
+    width: 28px;
+    height: 28px;
   }
 
   .settings-content {
@@ -361,7 +397,7 @@
   :global(.setting-label) {
     font-family: 'Fredoka One', sans-serif;
     font-size: 1rem;
-    color: #ffcc33;
+    color: rgb(96, 165, 250);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -375,20 +411,7 @@
   }
 
   .setting-icon {
-    font-size: 1.25rem;
-    animation: pulse 2s ease-in-out infinite;
     flex-shrink: 0;
-  }
-
-  @media (min-width: 640px) {
-    .setting-icon {
-      font-size: 1.5rem;
-    }
-  }
-
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
   }
 
   .setting-description {

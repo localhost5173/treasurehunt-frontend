@@ -185,11 +185,13 @@
   }
 
   .page-container {
-    min-height: calc(100vh - 80px);
-    padding: 2rem;
+    min-height: 100vh;
+    max-height: 100vh;
+    padding: 0.5rem;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: stretch;
+    overflow: hidden;
   }
 
   :global(.challenge-card) {
@@ -197,22 +199,29 @@
     max-width: 1200px;
     background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
 
   :global(.challenge-content) {
-    padding: 2rem;
+    padding: 0.75rem;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 0.75rem;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
   }
 
   .bottom-buttons {
     display: flex;
-    gap: 1rem;
+    gap: 0.5rem;
     justify-content: center;
     flex-wrap: wrap;
-    padding-top: 1rem;
+    padding-top: 0.5rem;
     border-top: 1px solid hsl(var(--border));
+    flex-shrink: 0;
   }
 
   /* RESPONSIVE DESIGN */

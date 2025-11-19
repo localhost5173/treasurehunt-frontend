@@ -490,102 +490,80 @@
 		</Card>
 	{:else}
 		<div class="active-challenge">
-			<!-- Action buttons - always visible when not on start form -->
-			<div class="action-buttons-top">
-				<Button variant="secondary" onclick={resetChallenge}>🆕 New Challenge</Button>
-				<Button variant="destructive" onclick={quitChallenge}>❌ Quit Challenge</Button>
-			</div>
-
 			{#if currentChallenge}
-			<Card class="challenge-main-card">
-				<CardHeader>
-					<CardTitle>Treasure Hunt Challenge</CardTitle>
-					<div class="challenge-info">
-						<div class="info-item">
-							<span class="label">Difficulty:</span>
-							<Badge variant={
-								currentChallenge.difficulty === 'easy' ? 'secondary' :
-								currentChallenge.difficulty === 'medium' ? 'default' : 'destructive'
-							}>
-								{currentChallenge.difficulty.toUpperCase()}
-							</Badge>
-						</div>
-						<div class="info-item">
-							<span class="label">Progress:</span>
-							<span class="value"
-								>{currentChallenge.completedItems} / {currentChallenge.totalItems}</span
-							>
-						</div>
+					<!-- Challenge info header (no card wrapper) -->
+					<div class="challenge-info-header">
+						<Badge variant={
+							currentChallenge.difficulty === 'easy' ? 'secondary' :
+							currentChallenge.difficulty === 'medium' ? 'default' : 'destructive'
+						}>
+							{currentChallenge.difficulty.toUpperCase()}
+						</Badge>
+						<span class="progress-text">{currentChallenge.completedItems} / {currentChallenge.totalItems}</span>
 					</div>
-				</CardHeader>
-				<CardContent>
-					<Progress value={progress} class="mb-6" />
 
 					{#if currentChallenge.isCompleted}
 						<Card class="completion-card">
 							<CardContent class="completion-content">
-								<h3 class="completion-title">🎉 Challenge Completed! 🎉</h3>
+								<h3 class="completion-title">🎉 Completed! 🎉</h3>
 								<p>You found all {currentChallenge.totalItems} items!</p>
-								<Button onclick={resetChallenge} size="lg">Start New Challenge</Button>
+								<Button onclick={resetChallenge} size="lg">Start New</Button>
 							</CardContent>
 						</Card>
 					{:else if currentItem}
-						<!-- Navigation header -->
-						<Card class="navigation-card">
-							<CardContent class="navigation-content">
-								<Button
-									variant="outline"
-									onclick={moveToPreviousItem}
-									disabled={!canGoPrevious}
-									size="sm"
-								>
-									← Previous
-								</Button>
-								<div class="item-counter">
-									Item {currentItemIndex + 1} of {currentChallenge.totalItems}
-								</div>
-								<Button
-									variant="outline"
-									onclick={moveToNextItem}
-									disabled={!canGoNext}
-									size="sm"
-								>
-									Next →
-								</Button>
-							</CardContent>
-						</Card>
+					
+						<!-- Visual indicator - circles for each item -->
+						<div class="items-indicator-section">
+							{#each currentChallenge.items as item, idx}
+								<div 
+									class="item-circle"
+									class:found={item.found}
+									class:current={idx === currentItemIndex}
+									title="{item.name} - {item.found ? 'Found' : 'Not found'}"
+								></div>
+							{/each}
+						</div>
+
+						<!-- Navigation buttons -->
+						<div class="navigation-section">
+							<Button 
+								variant="outline" 
+								onclick={moveToPreviousItem} 
+								disabled={!canGoPrevious}
+								size="sm"
+							>
+								← Prev
+							</Button>
+							
+							<Button 
+								variant="outline" 
+								onclick={moveToNextItem} 
+								disabled={!canGoNext}
+								size="sm"
+							>
+								Next →
+							</Button>
+						</div>
 
 						<!-- Current item card -->
-						<Card class="current-item-card {currentItem.found ? 'found' : ''}">
-							<CardContent>
-								<div class="item-status-bar">
-									<Badge variant="outline">#{currentItem.itemId}</Badge>
-									{#if currentItem.found}
-										<Badge variant="outline" class="found-badge">✓ Found</Badge>
-									{:else}
-										<Badge variant="outline" class="pending-badge">🎯 To Find</Badge>
-									{/if}
-								</div>
-
+						<Card class="current-item-card {currentItem.found ? 'found' : ''}" >
+							<CardContent class="compact-content">
 								<div class="item-name-large">{currentItem.name}</div>
 
 								{#if currentItem.found}
-									<Card class="found-card">
-										<CardContent>
-											<p class="found-icon">✅ Already found!</p>
-											<p class="found-time">
-												Found at: {new Date(currentItem.foundAt || '').toLocaleTimeString()}
-											</p>
-										</CardContent>
-									</Card>
+									<div class="found-message">
+										<p class="found-icon">✅</p>
+										<p class="found-time">
+											{new Date(currentItem.foundAt || '').toLocaleTimeString()}
+										</p>
+									</div>
 								{:else}
-									<p class="item-instruction">Find and photograph this item to mark it as complete</p>
 
 									<!-- Image upload section -->
-									<div class="upload-section">
+									<div class="upload-section-flex">
 										{#if imagePreview}
-											<div class="image-preview-large">
-												<img src={imagePreview} alt="Preview" />
+											<div class="image-preview-container">
+												<img src={imagePreview} alt="Preview" class="preview-image" />
 												<Button
 													variant="destructive"
 													size="icon"
@@ -595,85 +573,16 @@
 													✕
 												</Button>
 											</div>
-								{:else if showCamera}
-									<div class="camera-container">
-										{#if showPhotoConfirmation}
-											<!-- Photo confirmation screen -->
-											<div class="photo-confirmation">
-												<h3 class="confirmation-title">Use this photo?</h3>
-												<img src={capturedPhoto} alt="Captured" class="captured-preview" />
-												<div class="confirmation-buttons">
-													<Button variant="outline" size="lg" onclick={retakePhoto}>
-														🔄 Retake
-													</Button>
-													<Button size="lg" onclick={confirmPhoto}>
-														✓ Use Photo
-													</Button>
-												</div>
-												<Button variant="ghost" onclick={cancelCamera} class="cancel-link">
-													Cancel
+										{:else}
+											<div class="take-photo-area">
+												<Button
+													onclick={toggleCamera}
+													size="lg"
+													class="w-full camera-button-large"
+												>
+													📷 Take Photo
 												</Button>
 											</div>
-										{:else}
-											<!-- Live camera view -->
-											<div class="camera-view">
-												<div class="camera-header">
-													<h3 class="camera-title">Take a Photo</h3>
-													<Button
-														variant="ghost"
-														size="icon"
-														onclick={cancelCamera}
-														class="close-camera-button"
-													>
-														✕
-													</Button>
-												</div>
-												<!-- svelte-ignore a11y-media-has-caption -->
-												<video bind:this={videoElement} autoplay playsinline class="camera-video"></video>
-												<canvas bind:this={canvasElement} style="display: none;"></canvas>
-												{#if cameraError}
-													<div class="camera-error">{cameraError}</div>
-												{/if}
-												<div class="camera-controls">
-													<div class="capture-button-wrapper">
-														<button onclick={capturePhoto} class="capture-button-camera" type="button" disabled={!!cameraError} aria-label="Capture photo">
-															<span class="capture-inner"></span>
-														</button>
-														<span class="capture-label">Capture</span>
-													</div>
-												</div>
-											</div>
-										{/if}
-									</div>
-										{:else}
-											<Card class="upload-card">
-												<CardContent class="upload-zone">
-													<div class="upload-options">
-														<Button
-															onclick={toggleCamera}
-															size="lg"
-															class="camera-option-button"
-														>
-															<span class="option-icon">📷</span>
-															<span>Take Photo</span>
-														</Button>
-														<div class="or-divider">or</div>
-														<input
-															type="file"
-															accept="image/*"
-															onchange={handleFileInput}
-															style="display: none;"
-															id="file-input-current"
-														/>
-														<label for="file-input-current" class="upload-label-wrapper">
-															<Button size="lg" class="upload-label">
-																<span class="upload-icon">📁</span>
-																<span>Choose Image</span>
-															</Button>
-														</label>
-													</div>
-												</CardContent>
-											</Card>
 										{/if}
 
 										{#if message}
@@ -687,9 +596,9 @@
 												onclick={verifyCurrentItem}
 												disabled={verifying}
 												size="lg"
-												class="w-full verify-button"
+												class="w-full verify-button-large"
 											>
-												{verifying ? '⏳ Verifying with AI...' : '✓ Verify Item'}
+												{verifying ? '⏳ Verifying...' : '✓ Verify'}
 											</Button>
 										{/if}
 									</div>
@@ -697,38 +606,64 @@
 							</CardContent>
 						</Card>
 
-						<!-- Progress overview -->
-						<Card class="items-overview-card">
-							<CardHeader>
-								<CardTitle>All Items Overview</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div class="items-grid-mini">
-									{#each currentChallenge.items as item, idx}
-										<button
-											class="mini-item"
-											class:found={item.found}
-											class:current={idx === currentItemIndex}
-											onclick={() => {
-												currentItemIndex = idx;
-												clearImage();
-												saveChallengeToStorage();
-											}}
-											title="{item.name} - {item.found ? 'Found' : 'Not found'}"
-										>
-											{#if item.found}
-												✓
-											{:else}
-												{idx + 1}
-											{/if}
-										</button>
-									{/each}
+				{#if showCamera}
+					<div class="camera-container">
+						{#if showPhotoConfirmation}
+							<!-- Photo confirmation screen -->
+							<div class="photo-confirmation">
+								<h3 class="confirmation-title">Use this photo?</h3>
+								<img src={capturedPhoto} alt="Captured" class="captured-preview" />
+								<div class="confirmation-buttons">
+									<Button variant="outline" size="lg" onclick={retakePhoto}>
+										🔄 Retake
+									</Button>
+									<Button size="lg" onclick={confirmPhoto}>
+										✓ Use Photo
+									</Button>
 								</div>
-							</CardContent>
-						</Card>
+								<Button variant="ghost" onclick={cancelCamera} class="cancel-link">
+									Cancel
+								</Button>
+							</div>
+						{:else}
+							<!-- Live camera view -->
+							<div class="camera-view">
+								<div class="camera-header">
+									<h3 class="camera-title">Take a Photo</h3>
+									<Button
+										variant="ghost"
+										size="icon"
+										onclick={cancelCamera}
+										class="close-camera-button"
+									>
+										✕
+									</Button>
+								</div>
+								<!-- svelte-ignore a11y-media-has-caption -->
+								<video bind:this={videoElement} autoplay playsinline class="camera-video"></video>
+								<canvas bind:this={canvasElement} style="display: none;"></canvas>
+								{#if cameraError}
+									<div class="camera-error">{cameraError}</div>
+								{/if}
+								<div class="camera-controls">
+									<div class="capture-button-wrapper">
+										<button onclick={capturePhoto} class="capture-button-camera" type="button" disabled={!!cameraError} aria-label="Capture photo">
+											<span class="capture-inner"></span>
+										</button>
+										<span class="capture-label">Capture</span>
+									</div>
+								</div>
+							</div>
+						{/if}
+					</div>
+				{/if}
+
+						<!-- Action buttons at bottom -->
+						<div class="action-buttons-bottom">
+							<Button variant="secondary" onclick={resetChallenge}>🆕 New</Button>
+							<Button variant="destructive" onclick={quitChallenge}>❌ Quit</Button>
+						</div>
 					{/if}
-				</CardContent>
-			</Card>
 			{/if}
 		</div>
 	{/if}
@@ -737,10 +672,12 @@
 <style>
 	/* Dark Modern Challenge Styles */
 	.challenge-container {
-		max-width: 1200px;
+		max-width: 600px;
 		margin: 0 auto;
-		padding: 2rem;
-		min-height: 100vh;
+		padding: 0.5rem;
+		display: flex;
+		flex-direction: column;
+		height: 75vh;
 	}
 
 	/* Loading State */
@@ -805,56 +742,99 @@
 	.active-challenge {
 		display: flex;
 		flex-direction: column;
-		gap: 1.5rem;
+		gap: 0.5rem;
+		flex: 1;
+		min-height: 0;
+		overflow-y: auto;
+		padding: 0 2px;
 	}
 
-	.action-buttons-top {
+	.action-buttons-bottom {
 		display: flex;
-		gap: 0.75rem;
+		gap: 0.5rem;
 		justify-content: center;
 		flex-wrap: wrap;
+		flex-shrink: 0;
+		margin-top: auto;
+		padding-top: 0.5rem;
 	}
 
-	/* Challenge Card */
-	:global(.challenge-main-card) {
-		border: 2px solid hsl(var(--primary) / 0.3);
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-		backdrop-filter: blur(10px);
-	}
-
-	.challenge-info {
+	/* Challenge info header - compact */
+	.challenge-info-header {
 		display: flex;
-		gap: 2rem;
-		margin-top: 1rem;
-		flex-wrap: wrap;
-	}
-
-	.info-item {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-		padding: 0.75rem 1rem;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.5rem 0.75rem;
 		background: hsl(var(--muted) / 0.3);
 		border-radius: var(--radius);
 		border: 1px solid hsl(var(--border));
 	}
 
-	.info-item .label {
-		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
-		text-transform: uppercase;
-		letter-spacing: 1px;
-		font-weight: 600;
-	}
-
-	.info-item .value {
-		font-size: 1.5rem;
-		font-weight: 800;
+	.progress-text {
+		font-size: 1rem;
+		font-weight: 700;
 		color: hsl(var(--foreground));
 	}
 
-	:global(.mb-6) {
-		margin-bottom: 1.5rem;
+	/* Navigation section */
+	.navigation-section {
+		display: flex;
+		align-items: center;
+		justify-content: space-around;
+		gap: 1rem;
+		padding: 0.5rem;
+		background: hsl(var(--muted) / 0.2);
+		border-radius: var(--radius);
+		border: 1px solid hsl(var(--border));
+	}
+
+	/* Items indicator section - circles for each item */
+	.items-indicator-section {
+		display: flex;
+		gap: 0.4rem;
+		justify-content: center;
+		flex-wrap: wrap;
+		padding: 1rem 0.5rem 1.25rem 0.5rem;
+		background: hsl(var(--muted) / 0.2);
+		border-radius: var(--radius);
+		border: 1px solid hsl(var(--border));
+	}
+
+	.item-circle {
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background: #6b7280;
+		border: 2px solid #4b5563;
+		transition: all 0.2s;
+		position: relative;
+		flex-shrink: 0;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+	}
+
+	.item-circle.found {
+		background: #4caf50;
+		border-color: #45a049;
+		box-shadow: 0 0 12px rgba(76, 175, 80, 0.7), 0 2px 4px rgba(0, 0, 0, 0.3);
+	}
+
+	.item-circle.current {
+		box-shadow: 0 0 0 3px hsl(var(--primary) / 0.6), 0 2px 4px rgba(0, 0, 0, 0.4);
+		transform: scale(1.15);
+		border-width: 3px;
+	}
+
+	.item-circle.current::after {
+		content: '';
+		position: absolute;
+		bottom: -8px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 120%;
+		height: 3px;
+		background: hsl(var(--primary));
+		border-radius: 2px;
+		box-shadow: 0 0 6px hsl(var(--primary));
 	}
 
 	/* Completion Card */
@@ -866,7 +846,7 @@
 
 	:global(.completion-content) {
 		text-align: center;
-		padding: 3rem 2rem;
+		padding: 2rem 1rem;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -874,7 +854,7 @@
 	}
 
 	.completion-title {
-		font-size: 2.5rem;
+		font-size: 2rem;
 		margin: 0;
 		color: #4caf50;
 		font-weight: 800;
@@ -882,39 +862,30 @@
 	}
 
 	:global(.completion-content) p {
-		font-size: 1.125rem;
+		font-size: 1rem;
 		margin: 0;
 		color: hsl(var(--foreground));
 	}
 
-	/* Navigation Card */
-	:global(.navigation-card) {
-		border: 1px solid hsl(var(--border));
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-	}
-
-	:global(.navigation-content) {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 1rem;
-	}
-
-	.item-counter {
-		font-size: 1.125rem;
-		font-weight: 700;
-		color: hsl(var(--foreground));
-		padding: 0.5rem 1rem;
-		background: hsl(var(--primary) / 0.1);
-		border-radius: var(--radius);
-	}
-
 	/* Current Item Card */
 	:global(.current-item-card) {
-		border: 3px solid hsl(var(--primary) / 0.5);
-		box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+		border: 2px solid hsl(var(--primary) / 0.5);
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 		position: relative;
 		overflow: hidden;
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+		z-index: 1;
+	}
+
+	:global(.compact-content) {
+		padding: 0.75rem !important;
+		flex: 1 !important;
+		display: flex !important;
+		flex-direction: column !important;
+		min-height: 0 !important;
 	}
 
 	:global(.current-item-card)::before {
@@ -923,54 +894,31 @@
 		top: 0;
 		left: 0;
 		right: 0;
-		height: 4px;
+		height: 3px;
 		background: linear-gradient(90deg, hsl(var(--primary)) 0%, transparent 100%);
 	}
 
 	:global(.current-item-card.found) {
 		border-color: #4caf50;
 		background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, hsl(var(--card)) 100%);
-		box-shadow: 0 12px 40px rgba(76, 175, 80, 0.3);
+		box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
 	}
 
 	:global(.current-item-card.found)::before {
 		background: linear-gradient(90deg, #4caf50 0%, transparent 100%);
 	}
 
-	.item-status-bar {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 1.5rem;
-	}
-
-	:global(.found-badge) {
-		background: linear-gradient(135deg, #4caf50 0%, #45a049 100%) !important;
-		color: white !important;
-		border: none !important;
-		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
-		font-weight: 700;
-	}
-
-	:global(.pending-badge) {
-		background: linear-gradient(135deg, #ff9800 0%, #fb8c00 100%) !important;
-		color: white !important;
-		border: none !important;
-		box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
-		font-weight: 700;
-	}
-
 	.item-name-large {
-		font-size: clamp(2rem, 5vw, 3.5rem);
+		font-size: clamp(1.25rem, 4vw, 1.75rem);
 		font-weight: 900;
 		text-transform: uppercase;
-		letter-spacing: 4px;
+		letter-spacing: 1px;
 		text-align: center;
 		background: linear-gradient(135deg, hsl(var(--primary)) 0%, #8b5cf6 50%, #ec4899 100%);
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
 		background-clip: text;
-		margin: 1.5rem 0;
+		margin: 0.25rem 0 0.5rem 0;
 		animation: glow 3s ease-in-out infinite;
 	}
 
@@ -979,184 +927,100 @@
 		50% { filter: brightness(1.2); }
 	}
 
-	.item-instruction {
-		text-align: center;
-		color: hsl(var(--muted-foreground));
-		font-size: 1.125rem;
-		margin-bottom: 1.5rem;
-		font-weight: 500;
-	}
-
-	/* Found Item Card */
-	:global(.found-card) {
+	/* Found message - compact */
+	.found-message {
 		background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(76, 175, 80, 0.05) 100%);
 		border: 2px solid #4caf50;
-		box-shadow: 0 8px 24px rgba(76, 175, 80, 0.2);
+		border-radius: var(--radius);
+		padding: 1rem;
+		text-align: center;
 	}
 
-	:global(.found-card) .found-icon {
-		font-size: 3rem;
-		text-align: center;
-		margin: 0 0 0.5rem 0;
-		filter: drop-shadow(0 4px 8px rgba(76, 175, 80, 0.4));
+	.found-icon {
+		font-size: 2.5rem;
+		margin: 0 0 0.25rem 0;
+		filter: drop-shadow(0 2px 4px rgba(76, 175, 80, 0.4));
 	}
 
 	.found-time {
 		color: #4caf50;
-		font-size: 1rem;
+		font-size: 0.875rem;
 		font-weight: 600;
 		margin: 0;
-		text-align: center;
-		text-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
 	}
 
 	/* Upload Section */
-	.upload-section {
+	.upload-section-flex {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
+		gap: 0.5rem;
+		flex: 1;
+		min-height: 0;
 	}
 
-	:global(.upload-card) {
-		border: 3px dashed hsl(var(--border));
-		transition: all 0.3s;
-		background: hsl(var(--card) / 0.5);
-	}
-
-	:global(.upload-card:hover) {
-		border-color: hsl(var(--primary));
-		background: hsl(var(--primary) / 0.05);
-		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-		transform: translateY(-2px);
-	}
-
-	:global(.upload-zone) {
-		padding: 3rem 2rem;
-		text-align: center;
-	}
-
-	.upload-options {
+	.take-photo-area {
+		flex: 1;
 		display: flex;
-		flex-direction: column;
 		align-items: center;
-		gap: 1.5rem;
+		justify-content: center;
+		background: hsl(var(--muted) / 0.2);
+		border-radius: var(--radius);
+		border: 2px dashed hsl(var(--border));
+		padding: 2rem;
+		min-height: 200px;
 	}
 
-	:global(.camera-option-button) {
-		display: inline-flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 1rem;
-		min-width: 200px;
-		background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%) !important;
-		box-shadow: 0 8px 24px rgba(255, 107, 107, 0.4) !important;
+	:global(.camera-button-large) {
+		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+		box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4) !important;
 		transition: all 0.3s !important;
+		font-size: 1.25rem !important;
+		padding: 1.5rem 2rem !important;
+		height: auto !important;
 	}
 
-	:global(.camera-option-button:hover) {
-		box-shadow: 0 12px 32px rgba(255, 107, 107, 0.6) !important;
+	:global(.camera-button-large:hover) {
+		box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6) !important;
 		transform: translateY(-2px) !important;
 	}
 
-	.option-icon {
-		font-size: 3rem;
-		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-	}
-
-	.or-divider {
-		color: hsl(var(--muted-foreground));
-		font-size: 0.875rem;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 2px;
+	.image-preview-container {
 		position: relative;
-		padding: 0 1rem;
-	}
-
-	.or-divider::before,
-	.or-divider::after {
-		content: '';
-		position: absolute;
-		top: 50%;
-		width: 50px;
-		height: 1px;
-		background: hsl(var(--border));
-	}
-
-	.or-divider::before {
-		right: 100%;
-	}
-
-	.or-divider::after {
-		left: 100%;
-	}
-
-	.upload-label-wrapper {
-		cursor: pointer;
-	}
-
-	:global(.upload-label) {
-		display: inline-flex;
-		flex-direction: column;
+		width: 100%;
+		flex: 1;
+		display: flex;
 		align-items: center;
-		gap: 1rem;
-		min-width: 200px;
-		cursor: pointer;
-		transition: all 0.3s;
-	}
-
-	:global(.upload-label:hover) {
-		box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4) !important;
-		transform: translateY(-2px) !important;
-	}
-
-	.upload-icon {
-		font-size: 3rem;
-		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-	}
-
-	/* Image Preview */
-	.image-preview-large {
-		position: relative;
-		width: 100%;
-		max-height: 400px;
+		justify-content: center;
+		background: #000;
+		border-radius: var(--radius);
 		overflow: hidden;
-		border-radius: var(--radius);
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-		border: 2px solid hsl(var(--border));
+		min-height: 200px;
 	}
 
-	.image-preview-large img {
+	.preview-image {
 		width: 100%;
-		height: 400px;
-		object-fit: cover;
-		border-radius: var(--radius);
-	}
-
-	:global(.clear-button) {
-		position: absolute;
-		top: 10px;
-		right: 10px;
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6) !important;
-		backdrop-filter: blur(10px);
+		height: 100%;
+		object-fit: contain;
 	}
 
 	/* Verify Button */
-	:global(.verify-button) {
+	:global(.verify-button-large) {
 		background: linear-gradient(135deg, #4caf50 0%, #45a049 100%) !important;
 		color: white !important;
-		font-size: 1.25rem;
-		font-weight: 800;
-		text-transform: uppercase;
-		letter-spacing: 2px;
-		box-shadow: 0 8px 24px rgba(76, 175, 80, 0.4) !important;
+		font-size: 1.125rem !important;
+		font-weight: 800 !important;
+		text-transform: uppercase !important;
+		letter-spacing: 1px !important;
+		box-shadow: 0 4px 16px rgba(76, 175, 80, 0.4) !important;
 		transition: all 0.3s !important;
 		border: none !important;
+		padding: 1rem !important;
+		height: auto !important;
 	}
 
-	:global(.verify-button:hover) {
-		box-shadow: 0 12px 32px rgba(76, 175, 80, 0.6) !important;
-		transform: translateY(-2px) !important;
+	:global(.verify-button-large:hover) {
+		box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6) !important;
+		transform: translateY(-1px) !important;
 	}
 
 	/* Camera Container */
@@ -1200,7 +1064,7 @@
 		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 	}
 
-	.close-camera-button {
+	:global(.close-camera-button) {
 		background: transparent;
 		border: none;
 		color: white;
@@ -1216,7 +1080,7 @@
 		border-radius: 50%;
 	}
 
-	.close-camera-button:hover {
+	:global(.close-camera-button:hover) {
 		background: rgba(255, 255, 255, 0.2);
 		transform: rotate(90deg);
 	}
@@ -1343,203 +1207,58 @@
 		text-decoration: underline !important;
 	}
 
-	/* Items Overview */
-	:global(.items-overview-card) {
-		background: hsl(var(--muted) / 0.3);
-		border: 1px solid hsl(var(--border));
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-	}
-
-	.items-grid-mini {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-		gap: 0.5rem;
-	}
-
-	.mini-item {
-		aspect-ratio: 1;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: hsl(var(--background));
-		border: 2px solid hsl(var(--border));
-		border-radius: var(--radius);
-		cursor: pointer;
-		font-weight: 800;
-		transition: all 0.2s;
-		font-size: 1rem;
-		color: hsl(var(--foreground));
-	}
-
-	.mini-item.current {
-		border-color: hsl(var(--primary));
-		background: hsl(var(--primary) / 0.2);
-		transform: scale(1.15);
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-		color: hsl(var(--primary));
-		z-index: 1;
-	}
-
-	.mini-item.found {
-		background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
-		border-color: #4caf50;
-		color: white;
-		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
-	}
-
-	.mini-item:hover:not(.current) {
-		border-color: hsl(var(--primary));
-		transform: scale(1.08);
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-	}
+	/* Items Overview - REMOVED - Using indicator dots instead */
 
 	/* Responsive Design */
 	@media (max-width: 768px) {
 		.challenge-container {
-			padding: 1rem;
-		}
-
-		.challenge-info {
-			gap: 1rem;
-		}
-
-		.info-item {
-			flex: 1;
-			min-width: 120px;
-		}
-
-		.info-item .value {
-			font-size: 1.25rem;
+			padding: 0.25rem;
 		}
 
 		.item-name-large {
-			font-size: clamp(1.5rem, 4vw, 2rem);
-			letter-spacing: 2px;
-		}
-
-		:global(.navigation-content) {
-			flex-direction: column;
-			gap: 1rem;
-		}
-
-		.item-counter {
-			text-align: center;
-			width: 100%;
-		}
-
-		.upload-options {
-			gap: 1rem;
-		}
-
-		.option-icon,
-		.upload-icon {
-			font-size: 2.5rem;
-		}
-
-		:global(.camera-option-button),
-		:global(.upload-label) {
-			min-width: 180px;
-			padding: 1rem 1.5rem;
-			font-size: 0.95rem;
-		}
-
-		.image-preview-large {
-			max-height: 300px;
-		}
-
-		.image-preview-large img {
-			height: 300px;
-		}
-
-		.items-grid-mini {
-			grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
-			gap: 0.4rem;
-		}
-
-		.mini-item {
-			font-size: 0.875rem;
-		}
-
-		.completion-title {
-			font-size: 2rem;
-		}
-
-		.action-buttons-top {
-			flex-direction: column;
-			width: 100%;
-		}
-
-		.action-buttons-top :global(button) {
-			width: 100%;
-		}
-	}
-
-	@media (max-width: 480px) {
-		.challenge-container {
-			padding: 0.75rem;
-		}
-
-		.info-item {
-			padding: 0.5rem 0.75rem;
-		}
-
-		.info-item .label {
-			font-size: 0.7rem;
-		}
-
-		.info-item .value {
-			font-size: 1.125rem;
-		}
-
-		.item-name-large {
-			font-size: clamp(1.25rem, 4vw, 1.75rem);
+			font-size: clamp(1.25rem, 4vw, 1.5rem);
 			letter-spacing: 1px;
-			margin: 1rem 0;
-		}
-
-		.item-instruction {
-			font-size: 1rem;
-		}
-
-		.upload-options {
-			gap: 0.75rem;
-		}
-
-		.option-icon,
-		.upload-icon {
-			font-size: 2rem;
-		}
-
-		:global(.camera-option-button),
-		:global(.upload-label) {
-			min-width: 160px;
-			padding: 0.875rem 1.25rem;
-			font-size: 0.9rem;
-		}
-
-		.image-preview-large {
-			max-height: 250px;
-		}
-
-		.image-preview-large img {
-			height: 250px;
-		}
-
-		.items-grid-mini {
-			grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
-			gap: 0.35rem;
-		}
-
-		.mini-item {
-			font-size: 0.8rem;
 		}
 
 		.completion-title {
 			font-size: 1.75rem;
 		}
 
+		.action-buttons-bottom {
+			flex-direction: row;
+			width: 100%;
+		}
+
+		.action-buttons-bottom :global(button) {
+			flex: 1;
+		}
+
+		.item-circle {
+			width: 18px;
+			height: 18px;
+		}
+
+		.items-indicator-section {
+			gap: 0.35rem;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.challenge-container {
+			padding: 0.25rem;
+		}
+
+		.item-name-large {
+			font-size: clamp(1.125rem, 4vw, 1.5rem);
+			letter-spacing: 1px;
+		}
+
+		.completion-title {
+			font-size: 1.5rem;
+		}
+
 		:global(.completion-content) {
-			padding: 2rem 1rem;
+			padding: 1.5rem 0.75rem;
 		}
 
 		.capture-button-camera {
@@ -1547,34 +1266,37 @@
 			height: 70px;
 			border-width: 4px;
 		}
+
+		.item-circle {
+			width: 16px;
+			height: 16px;
+		}
+
+		.items-indicator-section {
+			gap: 0.3rem;
+			padding: 0.75rem 0.5rem 1rem 0.5rem;
+		}
 	}
 
 	@media (max-width: 360px) {
 		.item-name-large {
-			font-size: 1.25rem;
+			font-size: 1rem;
 		}
 
-		.items-grid-mini {
-			grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
+		.item-circle {
+			width: 14px;
+			height: 14px;
+		}
+
+		.items-indicator-section {
+			gap: 0.25rem;
 		}
 	}
 
 	@media (max-height: 600px) and (orientation: landscape) {
 		.item-name-large {
-			font-size: 1.5rem;
-			margin: 0.5rem 0;
-		}
-
-		.image-preview-large {
-			max-height: 200px;
-		}
-
-		.image-preview-large img {
-			height: 200px;
-		}
-
-		:global(.upload-zone) {
-			padding: 1rem;
+			font-size: 1.25rem;
+			margin: 0.25rem 0;
 		}
 
 		:global(.completion-content) {
@@ -1590,7 +1312,7 @@
 	}
 
 	/* Ensure images don't get inverted by Dark Reader */
-	.image-preview-large img,
+	.preview-image,
 	.captured-preview,
 	.camera-video {
 		color-scheme: only light;

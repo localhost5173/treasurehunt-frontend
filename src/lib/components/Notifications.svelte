@@ -65,21 +65,29 @@
 		return date.toLocaleDateString();
 	}
 
-	function getNotificationIcon(type: string): string {
+	function getNotificationIcon(type: string) {
 		switch (type) {
-			case 'friend_request': return '👥';
-			case 'battle_invite': return '⚔️';
-			case 'battle_accept': return '✅';
-			case 'friend_accept': return '🤝';
-			default: return '📬';
+			case 'friend_request': 
+				return `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
+			case 'battle_invite': 
+				return `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.2 7.8l-7.7 7.7-4-4-5.7 5.7"/><path d="M15 7h6v6"/></svg>`;
+			case 'battle_accept': 
+				return `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+			case 'friend_accept': 
+				return `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>`;
+			default: 
+				return `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>`;
 		}
 	}
 </script>
 
 <Popover bind:open={showDropdown}>
 	<PopoverTrigger class="relative">
-		<button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-10 w-10 relative">
-			<span class="text-xl">🔔</span>
+		<button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 w-10 relative floating-button">
+			<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+				<path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+			</svg>
 			{#if $notificationStore.unreadCount > 0}
 				<Badge 
 					variant="destructive" 
@@ -116,8 +124,8 @@
 							class="flex items-start gap-3 p-3 text-left transition-colors hover:bg-muted border-b last:border-b-0 {!notification.isRead ? 'bg-primary/5' : ''}"
 							onclick={() => handleNotificationClick(notification)}
 						>
-							<div class="text-2xl flex-shrink-0 mt-1">
-								{getNotificationIcon(notification.type)}
+							<div class="flex-shrink-0 mt-1">
+								{@html getNotificationIcon(notification.type)}
 							</div>
 							<div class="flex-1 min-w-0 space-y-1">
 								<p class="text-sm font-semibold text-foreground truncate">
