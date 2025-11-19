@@ -6,6 +6,8 @@
   import { onMount } from 'svelte';
   import Challenge from '$lib/components/Challenge.svelte';
   import { api } from '$lib/api/api';
+  import { Button } from '$lib/components/ui/button';
+  import { Card, CardContent } from '$lib/components/ui/card';
 
   let isAuthenticated = false;
   let challengeComponent: Challenge;
@@ -158,21 +160,23 @@
 
 {#if isAuthenticated}
   <div class="page-container">
-    <div class="challenge-wrapper">
-      <Challenge bind:this={challengeComponent} onQuit={goBack} />
-      <div class="bottom-buttons">
-        <button class="btn-log" on:click={goToChallengeLog}>Challenge Log</button>
-        <button class="btn-back" on:click={goBack}>
-          {isBattleChallenge ? 'Back to Battle' : 'Back to Menu'}
-        </button>
-      </div>
-    </div>
+    <Card class="challenge-card">
+      <CardContent class="challenge-content">
+        <Challenge bind:this={challengeComponent} onQuit={goBack} />
+        <div class="bottom-buttons">
+          <Button size="lg" variant="secondary" onclick={goToChallengeLog}>
+            📜 Challenge Log
+          </Button>
+          <Button size="lg" variant="outline" onclick={goBack}>
+            {isBattleChallenge ? '← Back to Battle' : '← Back to Menu'}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   </div>
 {/if}
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
-
   :global(body) {
     height: auto !important;
     min-height: 100vh;
@@ -181,118 +185,78 @@
   }
 
   .page-container {
-    min-height: 100vh;
-    font-family: 'Fredoka One', sans-serif;
-    background-image: url('/Background.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    padding: 20px;
+    min-height: calc(100vh - 80px);
+    padding: 2rem;
     display: flex;
     justify-content: center;
     align-items: flex-start;
   }
 
-  .challenge-wrapper {
+  :global(.challenge-card) {
     width: 100%;
     max-width: 1200px;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+  }
+
+  :global(.challenge-content) {
+    padding: 2rem;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 1.5rem;
   }
 
   .bottom-buttons {
     display: flex;
-    gap: 15px;
+    gap: 1rem;
     justify-content: center;
     flex-wrap: wrap;
-  }
-
-  .btn-back,
-  .btn-log {
-    width: 200px;
-    padding: 15px 0;
-    font-size: 20px;
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-    box-shadow: 0px 5px 0px;
-    transition: all 0.2s ease;
-    color: #fff;
-    font-family: 'Fredoka One', sans-serif;
-  }
-
-  .btn-back {
-    background: linear-gradient(#999, #666);
-    box-shadow: 0px 5px 0px #333;
-  }
-
-  .btn-log {
-    background: linear-gradient(#667eea, #764ba2);
-    box-shadow: 0px 5px 0px #4a2c75;
-  }
-
-  .btn-back:hover,
-  .btn-log:hover {
-    transform: translateY(-3px);
-  }
-
-  .btn-back:active,
-  .btn-log:active {
-    transform: translateY(3px);
-    box-shadow: 0px 0px 0px;
+    padding-top: 1rem;
+    border-top: 1px solid hsl(var(--border));
   }
 
   /* RESPONSIVE DESIGN */
   @media (max-width: 768px) {
     .page-container {
-      padding: 15px;
+      padding: 1rem;
     }
 
-    .challenge-wrapper {
-      gap: 15px;
+    :global(.challenge-content) {
+      padding: 1.5rem;
     }
 
     .bottom-buttons {
       flex-direction: column;
-      align-items: center;
+      align-items: stretch;
     }
 
-    .btn-back,
-    .btn-log {
+    .bottom-buttons :global(button) {
       width: 100%;
-      max-width: 280px;
-      font-size: 18px;
-      padding: 12px 0;
     }
   }
 
   @media (max-width: 480px) {
     .page-container {
-      padding: 10px;
+      padding: 0.5rem;
     }
 
-    .challenge-wrapper {
-      gap: 12px;
-    }
-
-    .btn-back,
-    .btn-log {
-      font-size: 16px;
-      padding: 10px 0;
+    :global(.challenge-content) {
+      padding: 1rem;
     }
   }
 
   @media (max-height: 600px) and (orientation: landscape) {
     .page-container {
-      padding: 10px;
-      align-items: flex-start;
+      padding: 0.5rem;
     }
 
-    .btn-back,
-    .btn-log {
-      padding: 10px 0;
-      font-size: 16px;
+    :global(.challenge-content) {
+      padding: 1rem;
+      gap: 1rem;
+    }
+
+    .bottom-buttons {
+      padding-top: 0.5rem;
     }
   }
 </style>

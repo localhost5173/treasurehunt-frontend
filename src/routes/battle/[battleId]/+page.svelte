@@ -5,6 +5,11 @@
 	import { authStore } from '$lib/stores/auth';
 	import { api, type Battle, type Challenge } from '$lib/api/api';
 	import BattleView from '$lib/components/BattleView.svelte';
+	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
+	import { Button } from '$lib/components/ui/button';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
+	import { Skeleton } from '$lib/components/ui/skeleton';
 
 	let battle: Battle | null = null;
 	let challenge: Challenge | null = null;
@@ -101,283 +106,121 @@
 	<title>Battle - Treasure Hunt</title>
 </svelte:head>
 
-<div class="battle-page">
+<div class="container mx-auto max-w-7xl p-4 md:p-6 lg:p-8">
 	{#if loading}
-		<div class="loading">Loading battle...</div>
+		<div class="space-y-6">
+			<Skeleton class="h-48 w-full" />
+			<Skeleton class="h-32 w-full" />
+			<div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+				<Skeleton class="h-32 w-full" />
+				<Skeleton class="h-32 w-full" />
+				<Skeleton class="h-32 w-full" />
+				<Skeleton class="h-32 w-full" />
+			</div>
+		</div>
 	{:else if error}
-		<div class="error-message">{error}</div>
+		<Alert variant="destructive">
+			<AlertTitle>Error</AlertTitle>
+			<AlertDescription>{error}</AlertDescription>
+		</Alert>
 	{:else if battle && $authStore.user}
 		<BattleView {battle} currentUser={$authStore.user} />
 
 		{#if battle.status === 'pending' && isOpponent}
-			<div class="pending-actions">
-				<h3>You've been challenged!</h3>
-				<p>Accept this battle to compete with your friend.</p>
-				<div class="action-buttons">
-					<button class="accept-btn" on:click={acceptBattle} disabled={acceptingBattle}>
-						{acceptingBattle ? 'Accepting...' : '✓ Accept Battle'}
-					</button>
-					<button class="decline-btn" on:click={declineBattle} disabled={decliningBattle}>
-						{decliningBattle ? 'Declining...' : '✗ Decline Battle'}
-					</button>
-				</div>
-			</div>
+			<Card class="mt-6">
+				<CardHeader>
+					<CardTitle>You've been challenged!</CardTitle>
+					<CardDescription>Accept this battle to compete with your friend.</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<div class="flex flex-wrap gap-3">
+						<Button 
+							variant="default" 
+							size="lg" 
+							onclick={acceptBattle} 
+							disabled={acceptingBattle}
+							class="flex-1 min-w-[150px]"
+						>
+							{acceptingBattle ? 'Accepting...' : '✓ Accept Battle'}
+						</Button>
+						<Button 
+							variant="destructive" 
+							size="lg" 
+							onclick={declineBattle} 
+							disabled={decliningBattle}
+							class="flex-1 min-w-[150px]"
+						>
+							{decliningBattle ? 'Declining...' : '✗ Decline Battle'}
+						</Button>
+					</div>
+				</CardContent>
+			</Card>
 		{/if}
 
 		{#if battle.status === 'active' && challenge}
-			<div class="challenge-section">
-				<h2>Your Challenge</h2>
-				<div class="items-grid">
-					{#each challenge.items as item (item.itemId)}
-						<div
-							class="item-card"
-							class:found={item.found}
-							class:selected={selectedItemId === item.itemId}
-							on:click={() => !item.found && selectItem(item.itemId)}
-							on:keydown={(e) => e.key === 'Enter' && !item.found && selectItem(item.itemId)}
-							role="button"
-							tabindex="0"
-						>
-							<div class="item-number">{item.itemId}</div>
-							<div class="item-name">{item.name}</div>
-							{#if item.found}
-								<div class="found-badge">✓ Found</div>
-							{:else if selectedItemId === item.itemId}
-								<div class="selected-badge">📷 Selected</div>
-							{/if}
-						</div>
-					{/each}
-				</div>
-
-				{#if selectedItemId !== null}
-					<div class="upload-section">
-						<h3>Find: {challenge.items.find((i) => i.itemId === selectedItemId)?.name}</h3>
-						<p>Take a photo of the item to verify you found it!</p>
-						<button class="cancel-selection" on:click={() => (selectedItemId = null)}>
-							Cancel
-						</button>
+			<Card class="mt-6">
+				<CardHeader>
+					<CardTitle>Your Challenge</CardTitle>
+					<CardDescription>Find all the items to win the battle!</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+						{#each challenge.items as item (item.itemId)}
+							<button
+								class="cursor-pointer transition-all hover:shadow-lg text-left"
+								onclick={() => !item.found && selectItem(item.itemId)}
+								disabled={item.found}
+							>
+								<Card 
+									class="{item.found ? 'bg-green-50 border-green-500' : ''} {selectedItemId === item.itemId ? 'border-primary bg-primary/5 shadow-md' : ''}"
+								>
+									<CardHeader class="p-4">
+										<div class="flex items-center justify-between">
+											<Badge variant="outline" class="text-xs">
+												#{item.itemId}
+											</Badge>
+											{#if item.found}
+												<Badge variant="default" class="bg-green-500">
+													✓
+												</Badge>
+											{:else if selectedItemId === item.itemId}
+												<Badge variant="default">
+													📷
+												</Badge>
+											{/if}
+										</div>
+										<CardTitle class="text-base mt-2">{item.name}</CardTitle>
+									</CardHeader>
+								</Card>
+							</button>
+						{/each}
 					</div>
-				{/if}
-			</div>
+
+					{#if selectedItemId !== null}
+						<Alert class="mt-6 border-primary bg-primary/5">
+							<AlertTitle class="text-primary">
+								Find: {challenge.items.find((i) => i.itemId === selectedItemId)?.name}
+							</AlertTitle>
+							<AlertDescription>
+								Take a photo of the item to verify you found it!
+							</AlertDescription>
+							<div class="mt-4">
+								<Button variant="outline" onclick={() => (selectedItemId = null)}>
+									Cancel Selection
+								</Button>
+							</div>
+						</Alert>
+					{/if}
+				</CardContent>
+			</Card>
 		{/if}
 
 		{#if battle.status === 'completed'}
-			<div class="completed-section">
-				<button class="back-btn" on:click={() => goto('/friends')}>
+			<div class="mt-6 text-center">
+				<Button size="lg" onclick={() => goto('/friends')}>
 					← Back to Friends
-				</button>
+				</Button>
 			</div>
 		{/if}
 	{/if}
 </div>
-
-<style>
-	.battle-page {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 2rem;
-	}
-
-	.loading,
-	.error-message {
-		text-align: center;
-		padding: 3rem;
-		font-size: 1.25rem;
-	}
-
-	.error-message {
-		color: #f44336;
-	}
-
-	.pending-actions {
-		background: white;
-		border-radius: 8px;
-		padding: 2rem;
-		margin-top: 2rem;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-		text-align: center;
-	}
-
-	.pending-actions h3 {
-		margin-top: 0;
-		color: #333;
-		font-size: 1.5rem;
-	}
-
-	.pending-actions p {
-		color: #666;
-		margin-bottom: 1.5rem;
-	}
-
-	.action-buttons {
-		display: flex;
-		gap: 1rem;
-		justify-content: center;
-		flex-wrap: wrap;
-	}
-
-	.accept-btn,
-	.decline-btn {
-		padding: 0.75rem 2rem;
-		border: none;
-		border-radius: 4px;
-		font-size: 1rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: opacity 0.3s;
-	}
-
-	.accept-btn {
-		background-color: #4caf50;
-		color: white;
-	}
-
-	.accept-btn:hover:not(:disabled) {
-		opacity: 0.9;
-	}
-
-	.decline-btn {
-		background-color: #f44336;
-		color: white;
-	}
-
-	.decline-btn:hover:not(:disabled) {
-		opacity: 0.9;
-	}
-
-	.accept-btn:disabled,
-	.decline-btn:disabled {
-		background-color: #cccccc;
-		cursor: not-allowed;
-	}
-
-	.challenge-section {
-		background: white;
-		border-radius: 8px;
-		padding: 2rem;
-		margin-top: 2rem;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	}
-
-	.challenge-section h2 {
-		margin-top: 0;
-		color: #333;
-		font-size: 1.75rem;
-		margin-bottom: 1.5rem;
-	}
-
-	.items-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-		gap: 1rem;
-		margin-bottom: 2rem;
-	}
-
-	.item-card {
-		background: #f8f9fa;
-		border: 2px solid #e0e0e0;
-		border-radius: 8px;
-		padding: 1rem;
-		text-align: center;
-		cursor: pointer;
-		transition: all 0.3s;
-	}
-
-	.item-card:hover:not(.found) {
-		border-color: #667eea;
-		transform: translateY(-2px);
-		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-	}
-
-	.item-card.found {
-		background: #e8f5e9;
-		border-color: #4caf50;
-		cursor: default;
-	}
-
-	.item-card.selected {
-		border-color: #667eea;
-		background: #e8eaf6;
-		box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-	}
-
-	.item-number {
-		font-size: 0.875rem;
-		color: #999;
-		margin-bottom: 0.5rem;
-	}
-
-	.item-name {
-		font-weight: 600;
-		color: #333;
-		margin-bottom: 0.5rem;
-		text-transform: capitalize;
-	}
-
-	.found-badge {
-		color: #4caf50;
-		font-size: 0.875rem;
-		font-weight: 600;
-	}
-
-	.selected-badge {
-		color: #667eea;
-		font-size: 0.875rem;
-		font-weight: 600;
-	}
-
-	.upload-section {
-		background: #f8f9fa;
-		border-radius: 8px;
-		padding: 2rem;
-		border: 2px dashed #667eea;
-		text-align: center;
-	}
-
-	.upload-section h3 {
-		margin-top: 0;
-		color: #667eea;
-		font-size: 1.25rem;
-		margin-bottom: 0.5rem;
-	}
-
-	.upload-section p {
-		color: #666;
-		margin-bottom: 1rem;
-	}
-
-	.cancel-selection {
-		padding: 0.5rem 1.5rem;
-		background-color: #999;
-		color: white;
-		border: none;
-		border-radius: 4px;
-		cursor: pointer;
-		font-weight: 500;
-	}
-
-	.cancel-selection:hover {
-		background-color: #777;
-	}
-
-	.completed-section {
-		margin-top: 2rem;
-		text-align: center;
-	}
-
-	.back-btn {
-		padding: 0.75rem 2rem;
-		background-color: #667eea;
-		color: white;
-		border: none;
-		border-radius: 4px;
-		font-size: 1rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: opacity 0.3s;
-	}
-
-	.back-btn:hover {
-		opacity: 0.9;
-	}
-</style>

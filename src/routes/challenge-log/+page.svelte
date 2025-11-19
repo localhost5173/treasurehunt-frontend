@@ -3,6 +3,12 @@
 	import { goto } from '$app/navigation';
 	import { authStore } from '$lib/stores/auth';
 	import { api, type Challenge } from '$lib/api/api';
+	import { Button } from '$lib/components/ui/button';
+	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Progress } from '$lib/components/ui/progress';
+	import { Separator } from '$lib/components/ui/separator';
+	import { Spinner } from '$lib/components/ui/spinner';
 
 	let challenges: Challenge[] = [];
 	let loading = true;
@@ -144,167 +150,181 @@
 	</div>
 
 	{#if loading}
-		<div class="loading">
-			<div class="spinner"></div>
-			<p>Loading your challenges...</p>
-		</div>
+		<Card class="loading-card">
+			<CardContent class="loading-content">
+				<Spinner class="spinner" />
+				<p>Loading your challenges...</p>
+			</CardContent>
+		</Card>
 	{:else if error}
-		<div class="error-message">
-			<p>{error}</p>
-			{#if !$authStore.isAuthenticated}
-				<button on:click={() => goto('/login')} class="primary-button">Go to Login</button>
-			{:else}
-				<button on:click={loadChallenges} class="secondary-button">Try Again</button>
-			{/if}
-		</div>
+		<Card class="error-card">
+			<CardContent class="error-content">
+				<p class="error-text">{error}</p>
+				{#if !$authStore.isAuthenticated}
+					<Button onclick={() => goto('/login')}>Go to Login</Button>
+				{:else}
+					<Button variant="secondary" onclick={loadChallenges}>Try Again</Button>
+				{/if}
+			</CardContent>
+		</Card>
 	{:else if challenges.length === 0}
-		<div class="empty-state">
-			<div class="empty-icon">📋</div>
-			<h2>No Challenges Yet</h2>
-			<p>Start your first treasure hunt challenge!</p>
-			<button on:click={() => goto('/challenge')} class="primary-button">Start Challenge</button>
-		</div>
+		<Card class="empty-card">
+			<CardContent class="empty-content">
+				<div class="empty-icon">📋</div>
+				<h2>No Challenges Yet</h2>
+				<p>Start your first treasure hunt challenge!</p>
+				<Button onclick={() => goto('/challenge')}>Start Challenge</Button>
+			</CardContent>
+		</Card>
 	{:else}
 		<!-- Stats Summary -->
-		<div class="stats-summary">
-			<div class="stat-card total">
-				<div class="stat-value">{challenges.length}</div>
-				<div class="stat-label">Total Challenges</div>
-			</div>
-			<div class="stat-card completed">
-				<div class="stat-value">{completedCount}</div>
-				<div class="stat-label">Completed</div>
-			</div>
-			<div class="stat-card incomplete">
-				<div class="stat-value">{incompleteCount}</div>
-				<div class="stat-label">In Progress</div>
-			</div>
+		<div class="stats-grid">
+			<Card class="stat-card">
+				<CardContent class="stat-content">
+					<div class="stat-value">{challenges.length}</div>
+					<div class="stat-label">Total Challenges</div>
+				</CardContent>
+			</Card>
+			<Card class="stat-card completed-card">
+				<CardContent class="stat-content">
+					<div class="stat-value">{completedCount}</div>
+					<div class="stat-label">Completed</div>
+				</CardContent>
+			</Card>
+			<Card class="stat-card incomplete-card">
+				<CardContent class="stat-content">
+					<div class="stat-value">{incompleteCount}</div>
+					<div class="stat-label">In Progress</div>
+				</CardContent>
+			</Card>
 		</div>
 
 		<!-- Filter Buttons -->
 		<div class="filter-buttons">
-			<button
-				class="filter-btn"
-				class:active={filter === 'all'}
-				on:click={() => (filter = 'all')}
+			<Button
+				variant={filter === 'all' ? 'default' : 'outline'}
+				onclick={() => (filter = 'all')}
 			>
 				All ({challenges.length})
-			</button>
-			<button
-				class="filter-btn"
-				class:active={filter === 'completed'}
-				on:click={() => (filter = 'completed')}
+			</Button>
+			<Button
+				variant={filter === 'completed' ? 'default' : 'outline'}
+				onclick={() => (filter = 'completed')}
 			>
 				Completed ({completedCount})
-			</button>
-			<button
-				class="filter-btn"
-				class:active={filter === 'incomplete'}
-				on:click={() => (filter = 'incomplete')}
+			</Button>
+			<Button
+				variant={filter === 'incomplete' ? 'default' : 'outline'}
+				onclick={() => (filter = 'incomplete')}
 			>
 				In Progress ({incompleteCount})
-			</button>
+			</Button>
 		</div>
 
 		<!-- Challenges List -->
 		<div class="challenges-list">
 			{#each filteredChallenges as challenge (challenge.id)}
-				<div class="challenge-card" class:completed={challenge.isCompleted}>
-					<div class="challenge-card-header">
-						<div class="header-left">
-							<span class="difficulty-badge difficulty-{challenge.difficulty}">
-								{challenge.difficulty.toUpperCase()}
-							</span>
-							{#if challenge.battleId}
-								<span class="battle-badge">⚔️ Battle</span>
-							{/if}
-							{#if challenge.isCompleted}
-								<span class="status-badge completed-badge">✓ Completed</span>
+				<Card class="challenge-card">
+					<CardHeader>
+						<div class="card-header-content">
+							<div class="badges">
+								<Badge variant={
+									challenge.difficulty === 'easy' ? 'secondary' :
+									challenge.difficulty === 'medium' ? 'default' : 'destructive'
+								}>
+									{challenge.difficulty.toUpperCase()}
+								</Badge>
+								{#if challenge.battleId}
+									<Badge>⚔️ Battle</Badge>
+								{/if}
+								{#if challenge.isCompleted}
+									<Badge variant="outline" class="completed-badge">✓ Completed</Badge>
+								{:else}
+									<Badge variant="outline" class="progress-badge">In Progress</Badge>
+								{/if}
+							</div>
+							<div class="challenge-date">
+								{formatDate(challenge.createdAt)}
+							</div>
+						</div>
+					</CardHeader>
+					<CardContent>
+						<div class="challenge-stats">
+							<div class="stat-item">
+								<div class="stat-icon">🎯</div>
+								<div class="stat-info">
+									<div class="stat-number">
+										{challenge.completedItems}/{challenge.totalItems}
+									</div>
+									<div class="stat-text">Items Found</div>
+								</div>
+							</div>
+
+							<div class="stat-item">
+								<div class="stat-icon">📊</div>
+								<div class="stat-info">
+									<div class="stat-number">
+										{Math.round((challenge.completedItems / challenge.totalItems) * 100)}%
+									</div>
+									<div class="stat-text">Complete</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Progress Bar -->
+						<Progress value={(challenge.completedItems / challenge.totalItems) * 100} class="my-4" />
+
+						<!-- Items Preview -->
+						<div class="items-preview">
+							<div class="items-grid-preview">
+								{#each challenge.items as item}
+									<div class="preview-item" class:found={item.found} title={item.name}>
+										{#if item.found}
+											<span class="check-icon">✓</span>
+										{:else}
+											<span class="item-number">{item.itemId}</span>
+										{/if}
+									</div>
+								{/each}
+							</div>
+						</div>
+
+						<Separator class="my-4" />
+
+						<!-- Action Buttons -->
+						<div class="challenge-actions">
+							{#if !challenge.isCompleted}
+								<Button class="w-full" onclick={() => resumeChallenge(challenge)}>
+									{challenge.battleId ? 'Go to Battle →' : 'Resume Challenge →'}
+								</Button>
 							{:else}
-								<span class="status-badge progress-badge">In Progress</span>
+								<Button variant="secondary" class="w-full" onclick={() => resumeChallenge(challenge)}>
+									{challenge.battleId ? 'View Battle' : 'View Details'}
+								</Button>
 							{/if}
 						</div>
-						<div class="challenge-date">
-							{formatDate(challenge.createdAt)}
-						</div>
-					</div>
-
-					<div class="challenge-stats">
-						<div class="stat-item">
-							<div class="stat-icon">🎯</div>
-							<div class="stat-info">
-								<div class="stat-number">
-									{challenge.completedItems}/{challenge.totalItems}
-								</div>
-								<div class="stat-text">Items Found</div>
-							</div>
-						</div>
-
-						<div class="stat-item">
-							<div class="stat-icon">📊</div>
-							<div class="stat-info">
-								<div class="stat-number">
-									{Math.round((challenge.completedItems / challenge.totalItems) * 100)}%
-								</div>
-								<div class="stat-text">Complete</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- Progress Bar -->
-					<div class="progress-bar">
-						<div
-							class="progress-fill"
-							style="width: {(challenge.completedItems / challenge.totalItems) * 100}%"
-						></div>
-					</div>
-
-					<!-- Items Preview -->
-					<div class="items-preview">
-						<div class="items-grid-preview">
-							{#each challenge.items as item}
-								<div class="preview-item" class:found={item.found} title={item.name}>
-									{#if item.found}
-										<span class="check-icon">✓</span>
-									{:else}
-										<span class="item-number">{item.itemId}</span>
-									{/if}
-								</div>
-							{/each}
-						</div>
-					</div>
-
-					<!-- Action Buttons -->
-					<div class="challenge-actions">
-						{#if !challenge.isCompleted}
-							<button on:click={() => resumeChallenge(challenge)} class="resume-button">
-								{challenge.battleId ? 'Go to Battle →' : 'Resume Challenge →'}
-							</button>
-						{:else}
-							<button on:click={() => resumeChallenge(challenge)} class="view-button">
-								{challenge.battleId ? 'View Battle' : 'View Details'}
-							</button>
-						{/if}
-					</div>
-				</div>
+					</CardContent>
+				</Card>
 			{/each}
 		</div>
 
 		{#if filteredChallenges.length === 0}
-			<div class="no-results">
-				<p>No {filter === 'completed' ? 'completed' : 'in progress'} challenges found.</p>
-			</div>
+			<Card>
+				<CardContent class="no-results">
+					<p>No {filter === 'completed' ? 'completed' : 'in progress'} challenges found.</p>
+				</CardContent>
+			</Card>
 		{/if}
 	{/if}
 
 	<!-- Action Buttons -->
 	<div class="bottom-actions">
-		<button on:click={() => goto('/challenge')} class="primary-button">
+		<Button size="lg" onclick={() => goto('/challenge')}>
 			Start New Challenge
-		</button>
-		<button on:click={() => goto('/')} class="secondary-button">
+		</Button>
+		<Button size="lg" variant="outline" onclick={() => goto('/')}>
 			Back to Home
-		</button>
+		</Button>
 	</div>
 </div>
 
@@ -335,121 +355,98 @@
 		font-size: 1.125rem;
 	}
 
-	.loading {
+	:global(.loading-card),
+	:global(.error-card),
+	:global(.empty-card) {
+		max-width: 600px;
+		margin: 0 auto;
+	}
+
+	:global(.loading-content),
+	:global(.error-content),
+	:global(.empty-content) {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		padding: 4rem 2rem;
-		gap: 1rem;
+		padding: 3rem 2rem;
+		gap: 1.5rem;
+		text-align: center;
 	}
 
-	.spinner {
+	:global(.spinner) {
 		width: 50px;
 		height: 50px;
-		border: 4px solid #f0f0f0;
-		border-top: 4px solid #667eea;
-		border-radius: 50%;
-		animation: spin 1s linear infinite;
 	}
 
-	@keyframes spin {
-		0% {
-			transform: rotate(0deg);
-		}
-		100% {
-			transform: rotate(360deg);
-		}
+	:global(.error-card) {
+		border: 2px solid hsl(var(--destructive));
+		background: hsl(var(--destructive) / 0.1);
 	}
 
-	.error-message {
-		background: #ffebee;
-		border: 2px solid #f44336;
-		border-radius: 12px;
-		padding: 2rem;
-		text-align: center;
-	}
-
-	.error-message p {
-		color: #c62828;
+	.error-text {
+		color: hsl(var(--destructive));
 		font-size: 1.125rem;
-		margin-bottom: 1.5rem;
-	}
-
-	.empty-state {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		padding: 4rem 2rem;
-		text-align: center;
+		margin: 0;
 	}
 
 	.empty-icon {
 		font-size: 5rem;
-		margin-bottom: 1.5rem;
 	}
 
-	.empty-state h2 {
+	:global(.empty-content) h2 {
 		font-size: 2rem;
-		color: #333;
-		margin-bottom: 1rem;
+		margin: 0;
 	}
 
-	.empty-state p {
+	:global(.empty-content) p {
 		color: #666;
 		font-size: 1.125rem;
-		margin-bottom: 2rem;
+		margin: 0;
 	}
 
-	.stats-summary {
+	.stats-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 		gap: 1.5rem;
 		margin-bottom: 2rem;
 	}
 
-	.stat-card {
-		background: white;
-		padding: 2rem;
-		border-radius: 12px;
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-		text-align: center;
-		border: 3px solid transparent;
+	:global(.stat-card) {
 		transition: all 0.2s;
 	}
 
-	.stat-card:hover {
+	:global(.stat-card:hover) {
 		transform: translateY(-4px);
 		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 	}
 
-	.stat-card.total {
-		border-color: #667eea;
-	}
-
-	.stat-card.completed {
-		border-color: #4caf50;
-	}
-
-	.stat-card.incomplete {
-		border-color: #ff9800;
+	:global(.stat-content) {
+		text-align: center;
+		padding: 2rem 1rem;
 	}
 
 	.stat-value {
 		font-size: 3rem;
 		font-weight: 800;
-		color: #333;
 		line-height: 1;
 		margin-bottom: 0.5rem;
 	}
 
 	.stat-label {
-		color: #666;
+		color: hsl(var(--muted-foreground));
 		font-size: 1rem;
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 1px;
+	}
+
+	:global(.completed-card) {
+		border: 2px solid #4caf50;
+	}
+
+	:global(.incomplete-card) {
+		border: 2px solid #ff9800;
 	}
 
 	.filter-buttons {
@@ -460,28 +457,6 @@
 		flex-wrap: wrap;
 	}
 
-	.filter-btn {
-		padding: 0.75rem 1.5rem;
-		background: white;
-		border: 2px solid #e0e0e0;
-		border-radius: 8px;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.2s;
-		color: #666;
-	}
-
-	.filter-btn:hover {
-		border-color: #667eea;
-		color: #667eea;
-	}
-
-	.filter-btn.active {
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		border-color: #667eea;
-		color: white;
-	}
-
 	.challenges-list {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -489,115 +464,62 @@
 		margin-bottom: 2rem;
 	}
 
-	.challenge-card {
-		background: white;
-		border-radius: 16px;
-		padding: 1.5rem;
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-		border: 3px solid #e0e0e0;
+	:global(.challenge-card) {
 		transition: all 0.3s;
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
 	}
 
-	.challenge-card:hover {
+	:global(.challenge-card:hover) {
 		transform: translateY(-4px);
 		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-		border-color: #667eea;
 	}
 
-	.challenge-card.completed {
-		border-color: #4caf50;
-	}
-
-	.challenge-card-header {
+	.card-header-content {
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
+		align-items: flex-start;
 		gap: 1rem;
+		width: 100%;
 	}
 
-	.header-left {
+	.badges {
 		display: flex;
 		gap: 0.5rem;
 		flex-wrap: wrap;
 	}
 
-	.challenge-date {
-		color: #666;
-		font-size: 0.875rem;
-		white-space: nowrap;
-	}
-
-	.difficulty-badge {
-		padding: 0.375rem 0.75rem;
-		border-radius: 6px;
-		font-size: 0.75rem;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-	}
-
-	.difficulty-easy {
-		background: #e8f5e9;
-		color: #2e7d32;
-	}
-
-	.difficulty-medium {
-		background: #fff3e0;
-		color: #e65100;
-	}
-
-	.difficulty-hard {
-		background: #ffebee;
-		color: #c62828;
-	}
-
-	.battle-badge {
-		padding: 0.375rem 0.75rem;
-		border-radius: 6px;
-		font-size: 0.75rem;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		color: white;
-	}
-
-	.status-badge {
-		padding: 0.375rem 0.75rem;
-		border-radius: 6px;
-		font-size: 0.75rem;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-	}
-
-	.completed-badge {
+	:global(.completed-badge) {
 		background: #4caf50;
 		color: white;
+		border-color: #4caf50;
 	}
 
-	.progress-badge {
+	:global(.progress-badge) {
 		background: #ff9800;
 		color: white;
+		border-color: #ff9800;
+	}
+
+	.challenge-date {
+		color: hsl(var(--muted-foreground));
+		font-size: 0.875rem;
+		white-space: nowrap;
 	}
 
 	.challenge-stats {
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
 		gap: 1rem;
+		margin-bottom: 1rem;
 	}
 
 	.stat-item {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.75rem;
 	}
 
 	.stat-icon {
-		font-size: 1.5rem;
+		font-size: 1.75rem;
 	}
 
 	.stat-info {
@@ -606,34 +528,25 @@
 	}
 
 	.stat-number {
-		font-size: 1.125rem;
+		font-size: 1.25rem;
 		font-weight: 700;
-		color: #333;
 		line-height: 1;
 	}
 
 	.stat-text {
 		font-size: 0.75rem;
-		color: #666;
+		color: hsl(var(--muted-foreground));
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
 	}
 
-	.progress-bar {
-		height: 8px;
-		background: #e0e0e0;
-		border-radius: 4px;
-		overflow: hidden;
-	}
-
-	.progress-fill {
-		height: 100%;
-		background: linear-gradient(90deg, #4caf50, #8bc34a);
-		transition: width 0.3s ease;
+	:global(.my-4) {
+		margin-top: 1rem;
+		margin-bottom: 1rem;
 	}
 
 	.items-preview {
-		background: #f5f5f5;
+		background: hsl(var(--muted) / 0.3);
 		padding: 1rem;
 		border-radius: 8px;
 	}
@@ -649,8 +562,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: white;
-		border: 2px solid #e0e0e0;
+		background: hsl(var(--background));
+		border: 2px solid hsl(var(--border));
 		border-radius: 6px;
 		font-size: 0.75rem;
 		font-weight: 600;
@@ -668,7 +581,7 @@
 	}
 
 	.item-number {
-		color: #999;
+		color: hsl(var(--muted-foreground));
 	}
 
 	.challenge-actions {
@@ -676,51 +589,19 @@
 		gap: 0.75rem;
 	}
 
-	.resume-button {
-		flex: 1;
-		padding: 0.875rem;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		color: white;
-		border: none;
-		border-radius: 8px;
-		font-weight: 700;
-		cursor: pointer;
-		transition: all 0.2s;
-		text-transform: uppercase;
-		letter-spacing: 1px;
-		font-size: 0.875rem;
+	:global(.w-full) {
+		width: 100%;
 	}
 
-	.resume-button:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-	}
-
-	.view-button {
-		flex: 1;
-		padding: 0.875rem;
-		background: white;
-		color: #667eea;
-		border: 2px solid #667eea;
-		border-radius: 8px;
-		font-weight: 700;
-		cursor: pointer;
-		transition: all 0.2s;
-		text-transform: uppercase;
-		letter-spacing: 1px;
-		font-size: 0.875rem;
-	}
-
-	.view-button:hover {
-		background: #667eea;
-		color: white;
-	}
-
-	.no-results {
+	:global(.no-results) {
 		text-align: center;
 		padding: 2rem;
-		color: #666;
+	}
+
+	:global(.no-results) p {
+		color: hsl(var(--muted-foreground));
 		font-size: 1.125rem;
+		margin: 0;
 	}
 
 	.bottom-actions {
@@ -729,40 +610,6 @@
 		justify-content: center;
 		margin-top: 3rem;
 		flex-wrap: wrap;
-	}
-
-	.primary-button {
-		padding: 1rem 2rem;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		color: white;
-		border: none;
-		border-radius: 8px;
-		font-size: 1.125rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.2s;
-	}
-
-	.primary-button:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-	}
-
-	.secondary-button {
-		padding: 1rem 2rem;
-		background: white;
-		color: #667eea;
-		border: 2px solid #667eea;
-		border-radius: 8px;
-		font-size: 1.125rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.2s;
-	}
-
-	.secondary-button:hover {
-		background: #667eea;
-		color: white;
 	}
 
 	/* Responsive Design */
@@ -779,7 +626,7 @@
 			font-size: 1rem;
 		}
 
-		.stats-summary {
+		.stats-grid {
 			grid-template-columns: 1fr;
 		}
 
@@ -797,18 +644,19 @@
 
 		.filter-buttons {
 			flex-direction: column;
+			width: 100%;
 		}
 
-		.filter-btn {
+		.filter-buttons :global(button) {
 			width: 100%;
 		}
 
 		.bottom-actions {
 			flex-direction: column;
+			width: 100%;
 		}
 
-		.primary-button,
-		.secondary-button {
+		.bottom-actions :global(button) {
 			width: 100%;
 		}
 	}
@@ -822,11 +670,7 @@
 			font-size: 2.5rem;
 		}
 
-		.challenge-card {
-			padding: 1rem;
-		}
-
-		.challenge-card-header {
+		.card-header-content {
 			flex-direction: column;
 			align-items: flex-start;
 		}
