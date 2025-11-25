@@ -548,7 +548,9 @@
 						<!-- Current item card -->
 						<Card class="current-item-card {currentItem.found ? 'found' : ''}" >
 							<CardContent class="compact-content">
-								<div class="item-name-large">{currentItem.name}</div>
+								{#if !currentItem.found}
+									<div class="find-instruction">{currentItem.name}</div>
+								{/if}
 
 								{#if currentItem.found}
 									<div class="found-message">
@@ -908,18 +910,39 @@
 		background: linear-gradient(90deg, #4caf50 0%, transparent 100%);
 	}
 
+	.find-instruction {
+		font-size: 0.875rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		text-align: center;
+		color: hsl(var(--muted-foreground));
+		margin: 0 0 0.25rem 0;
+	}
+
 	.item-name-large {
 		font-size: clamp(1.25rem, 4vw, 1.75rem);
 		font-weight: 900;
 		text-transform: uppercase;
 		letter-spacing: 1px;
 		text-align: center;
+		color: hsl(var(--primary));
 		background: linear-gradient(135deg, hsl(var(--primary)) 0%, #8b5cf6 50%, #ec4899 100%);
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
 		background-clip: text;
 		margin: 0.25rem 0 0.5rem 0;
+		text-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
 		animation: glow 3s ease-in-out infinite;
+	}
+	
+	/* Fallback for browsers that don't support background-clip */
+	@supports not (background-clip: text) {
+		.item-name-large {
+			background: none;
+			color: hsl(var(--primary));
+			-webkit-text-fill-color: initial;
+		}
 	}
 
 	@keyframes glow {
