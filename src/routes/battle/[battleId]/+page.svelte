@@ -32,7 +32,29 @@
 		loadBattle();
 		// Poll for battle updates every 5 seconds
 		const interval = setInterval(loadBattle, 5000);
-		return () => clearInterval(interval);
+		
+		// Listen for WebSocket battle updates
+		const handleRefresh = () => {
+			console.log('Refreshing battle details...');
+			loadBattle();
+		};
+		window.addEventListener('refresh-battles', handleRefresh);
+		
+		// Listen for battle started event (when opponent accepts)
+		const handleBattleStarted = (event: CustomEvent<{ battleId: string }>) => {
+			console.log('Battle started event received:', event.detail);
+			// If this is our battle, redirect to challenge page
+			if (event.detail.battleId === battleId) {
+				goto(`/challenge?battleId=${battleId}`);
+			}
+		};
+		window.addEventListener('battle-started', handleBattleStarted as EventListener);
+		
+		return () => {
+			clearInterval(interval);
+			window.removeEventListener('refresh-battles', handleRefresh);
+			window.removeEventListener('battle-started', handleBattleStarted as EventListener);
+		};
 	});
 
 	async function loadBattle() {

@@ -14,7 +14,18 @@
 		loadFriends();
 		// Poll for online status updates every 30 seconds
 		const interval = setInterval(loadFriends, 30000);
-		return () => clearInterval(interval);
+		
+		// Listen for WebSocket friend list updates
+		const handleRefresh = () => {
+			console.log('Refreshing friends list...');
+			loadFriends();
+		};
+		window.addEventListener('refresh-friends', handleRefresh);
+		
+		return () => {
+			clearInterval(interval);
+			window.removeEventListener('refresh-friends', handleRefresh);
+		};
 	});
 
 	async function loadFriends() {
