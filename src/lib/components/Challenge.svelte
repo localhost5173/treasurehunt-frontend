@@ -559,57 +559,6 @@
 						</Button>
 					</div>
 
-<<<<<<< Updated upstream
-						<!-- Current item card -->
-						<Card class="current-item-card {currentItem.found ? 'found' : ''}" >
-							<CardContent class="compact-content">
-								{#if !currentItem.found}
-									<div class="find-instruction">{currentItem.name}</div>
-								{/if}
-
-								{#if currentItem.found}
-									<div class="found-message">
-										<p class="found-icon">✅</p>
-										<p class="found-time">
-											{new Date(currentItem.foundAt || '').toLocaleTimeString()}
-										</p>
-									</div>
-								{:else}
-
-									<!-- Image upload section -->
-									<div class="upload-section-flex">
-										{#if imagePreview}
-											<div class="image-preview-container">
-												<img src={imagePreview} alt="Preview" class="preview-image" />
-												<Button
-													variant="destructive"
-													size="icon"
-													class="clear-button"
-													onclick={clearImage}
-												>
-													✕
-												</Button>
-											</div>
-										{:else}
-											<div class="take-photo-area">
-												<Button
-													onclick={toggleCamera}
-													size="lg"
-													class="w-full camera-button-large"
-												>
-													📷 Take Photo
-												</Button>
-											</div>
-										{/if}
-
-										{#if message}
-											<Alert variant={message.type === 'success' ? 'default' : 'destructive'}>
-												{message.text}
-											</Alert>
-										{/if}
-
-										{#if imageFile && !currentItem.found}
-=======
 					<!-- Current item card -->
 					<Card class="current-item-card {currentItem.found ? 'found' : ''}">
 						<CardContent class="compact-content">
@@ -629,7 +578,6 @@
 									{#if imagePreview}
 										<div class="image-preview-container">
 											<img src={imagePreview} alt="Preview" class="preview-image" />
->>>>>>> Stashed changes
 											<Button
 												variant="destructive"
 												size="icon"
@@ -648,9 +596,14 @@
 									{/if}
 
 									{#if message}
-										<Alert variant={message.type === 'success' ? 'default' : 'destructive'}>
-											{message.text}
-										</Alert>
+										<div class="message-container {message.type}">
+											<div class="message-icon">
+												{message.type === 'success' ? '✅' : '❌'}
+											</div>
+											<div class="message-content">
+												<div class="message-text">{message.text}</div>
+											</div>
+										</div>
 									{/if}
 
 									{#if imageFile && !currentItem.found}
@@ -1002,18 +955,8 @@
 		letter-spacing: 2px;
 		text-align: center;
 		color: hsl(var(--primary));
-<<<<<<< Updated upstream
-		background: linear-gradient(135deg, hsl(var(--primary)) 0%, #8b5cf6 50%, #ec4899 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-		margin: 0.25rem 0 0.5rem 0;
-		text-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
-		animation: glow 3s ease-in-out infinite;
-=======
 		text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 		margin: 0.25rem 0 0.5rem 0;
->>>>>>> Stashed changes
 	}
 	
 	/* Fallback for browsers that don't support background-clip */
@@ -1317,6 +1260,125 @@
 
 	/* Items Overview - REMOVED - Using indicator dots instead */
 
+	/* Message Container Styles */
+	.message-container {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		padding: 1.25rem 1.5rem;
+		border-radius: 12px;
+		border: 2px solid;
+		animation: slideIn 0.3s ease-out, pulse 0.6s ease-out;
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
+		backdrop-filter: blur(12px);
+		position: relative;
+		overflow: hidden;
+	}
+
+	.message-container::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		opacity: 0.05;
+		background: repeating-linear-gradient(
+			45deg,
+			transparent,
+			transparent 10px,
+			currentColor 10px,
+			currentColor 20px
+		);
+		pointer-events: none;
+	}
+
+	@keyframes slideIn {
+		from {
+			opacity: 0;
+			transform: translateY(-10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@keyframes pulse {
+		0% {
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
+		}
+		50% {
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
+		}
+		100% {
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
+		}
+	}
+
+	.message-container.success {
+		background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(76, 175, 80, 0.1) 100%);
+		border-color: #4caf50;
+		color: #4caf50;
+		box-shadow: 0 8px 24px rgba(76, 175, 80, 0.25), 0 2px 8px rgba(76, 175, 80, 0.15);
+	}
+
+	.message-container.error {
+		background: linear-gradient(135deg, rgba(244, 67, 54, 0.2) 0%, rgba(244, 67, 54, 0.1) 100%);
+		border-color: #f44336;
+		color: #f44336;
+		box-shadow: 0 8px 24px rgba(244, 67, 54, 0.25), 0 2px 8px rgba(244, 67, 54, 0.15);
+	}
+
+	.message-icon {
+		font-size: 2.5rem;
+		flex-shrink: 0;
+		filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
+		animation: iconPop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+		position: relative;
+		z-index: 1;
+	}
+
+	@keyframes iconPop {
+		0% {
+			transform: scale(0) rotate(-180deg);
+			opacity: 0;
+		}
+		50% {
+			transform: scale(1.3) rotate(10deg);
+		}
+		100% {
+			transform: scale(1) rotate(0deg);
+			opacity: 1;
+		}
+	}
+
+	.message-content {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		position: relative;
+		z-index: 1;
+	}
+
+	.message-text {
+		font-size: 1.0625rem;
+		font-weight: 700;
+		line-height: 1.5;
+		letter-spacing: 0.01em;
+		color: hsl(var(--foreground));
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+	}
+
+	.message-container.success .message-text {
+		color: #1b5e20;
+	}
+
+	.message-container.error .message-text {
+		color: #b71c1c;
+	}
+
 	/* Responsive Design */
 	@media (max-width: 768px) {
 		.challenge-container {
@@ -1348,6 +1410,21 @@
 
 		.items-indicator-section {
 			gap: 0.35rem;
+		}
+
+		.message-container {
+			padding: 1.125rem 1.375rem;
+			gap: 0.875rem;
+			border-radius: 10px;
+		}
+
+		.message-icon {
+			font-size: 2.25rem;
+		}
+
+		.message-text {
+			font-size: 1rem;
+			font-weight: 700;
 		}
 	}
 
@@ -1383,6 +1460,21 @@
 		.items-indicator-section {
 			gap: 0.3rem;
 			padding: 0.75rem 0.5rem 1rem 0.5rem;
+		}
+
+		.message-container {
+			padding: 1rem 1.25rem;
+			gap: 0.75rem;
+			border-radius: 8px;
+		}
+
+		.message-icon {
+			font-size: 2rem;
+		}
+
+		.message-text {
+			font-size: 0.9375rem;
+			font-weight: 700;
 		}
 	}
 
