@@ -5,6 +5,7 @@
 	import { page } from '$app/stores';
 	import favicon from '$lib/assets/favicon.svg';
 	import { authStore } from '$lib/stores/auth';
+	import { websocketStore } from '$lib/stores/websocket';
 	import { api } from '$lib/api/api';
 	import Notifications from '$lib/components/Notifications.svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -25,6 +26,11 @@
 	onMount(() => {
 		authStore.checkAuth();
 
+		// Initialize WebSocket connection if authenticated
+		if ($authStore.token) {
+			websocketStore.connect();
+		}
+
 		// Update online status when user is active
 		if ($authStore.token) {
 			api.friends.updateOnlineStatus($authStore.token, true);
@@ -43,6 +49,9 @@
 				if ($authStore.token) {
 					api.friends.updateOnlineStatus($authStore.token, false);
 				}
+
+				// Disconnect WebSocket on unmount
+				websocketStore.disconnect();
 			};
 		}
 	});
@@ -52,6 +61,8 @@
 			api.friends.updateOnlineStatus($authStore.token, false);
 		}
 
+		// Disconnect WebSocket before logout
+		websocketStore.disconnect();
 		authStore.logout();
 		goto('/login');
 		mobileMenuOpen = false;

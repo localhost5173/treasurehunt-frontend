@@ -35,6 +35,17 @@
 		}
 
 		await loadFriendRequests();
+		
+		// Listen for WebSocket friend list updates
+		const handleRefresh = () => {
+			console.log('Refreshing friend requests...');
+			loadFriendRequests();
+		};
+		window.addEventListener('refresh-friends', handleRefresh);
+		
+		return () => {
+			window.removeEventListener('refresh-friends', handleRefresh);
+		};
 	});
 
 	async function loadFriendRequests() {
