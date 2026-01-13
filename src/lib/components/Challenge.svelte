@@ -4,7 +4,13 @@
 	import { api, type Challenge, type ChallengeItem } from '$lib/api/api';
 	import { authStore } from '$lib/stores/auth';
 	import { Button } from '$lib/components/ui/button';
-	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
+	import {
+		Card,
+		CardContent,
+		CardDescription,
+		CardHeader,
+		CardTitle
+	} from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Progress } from '$lib/components/ui/progress';
 	import { Label } from '$lib/components/ui/label';
@@ -32,7 +38,7 @@
 		currentItemIndex = 0;
 		clearImage();
 		clearChallengeStorage();
-		
+
 		// Call parent's callback if provided
 		if (onQuit) {
 			onQuit();
@@ -73,7 +79,7 @@
 
 	// Load challenge from localStorage on mount
 	let hasAttemptedLoad = false;
-	
+
 	onMount(() => {
 		if (browser) {
 			loadChallengeFromStorage();
@@ -111,12 +117,12 @@
 
 	function loadChallengeFromStorage() {
 		if (!browser) return;
-		
+
 		const storageKey = getStorageKey();
 		console.log('Loading challenge with key:', storageKey);
 		const stored = localStorage.getItem(storageKey);
 		console.log('Stored data:', stored ? 'Found' : 'Not found');
-		
+
 		if (stored) {
 			try {
 				const data = JSON.parse(stored);
@@ -126,7 +132,12 @@
 				currentItemIndex = data.currentItemIndex || 0;
 				// If we have a challenge loaded, don't show the start form
 				showStartForm = false;
-				console.log('Challenge loaded successfully. showStartForm:', showStartForm, 'currentChallenge:', currentChallenge);
+				console.log(
+					'Challenge loaded successfully. showStartForm:',
+					showStartForm,
+					'currentChallenge:',
+					currentChallenge
+				);
 			} catch (e) {
 				console.error('Failed to load challenge from storage:', e);
 			}
@@ -155,15 +166,15 @@
 				totalItems
 			});
 			console.log('Challenge started:', challenge);
-			
+
 			// Update state - set challenge FIRST, then hide form
 			currentItemIndex = 0;
 			clearImage();
 			currentChallenge = challenge;
-			
+
 			// Wait a tick to ensure reactivity
-			await new Promise(resolve => setTimeout(resolve, 0));
-			
+			await new Promise((resolve) => setTimeout(resolve, 0));
+
 			showStartForm = false;
 			saveChallengeToStorage();
 		} catch (err: any) {
@@ -200,7 +211,12 @@
 				const base64 = e.target?.result as string;
 
 				try {
-					console.log('Verifying item with challenge ID:', currentChallenge!.id, 'Item ID:', currentItem.itemId);
+					console.log(
+						'Verifying item with challenge ID:',
+						currentChallenge!.id,
+						'Item ID:',
+						currentItem.itemId
+					);
 					const result = await api.challenges.verifyItem(
 						token,
 						currentChallenge!.id,
@@ -309,23 +325,23 @@
 		cameraError = '';
 		capturedPhoto = '';
 		showPhotoConfirmation = false;
-		
+
 		try {
 			// First, show the camera UI (this will mount the video element)
 			showCamera = true;
-			
+
 			// Wait a tick for the DOM to update and video element to be available
-			await new Promise(resolve => setTimeout(resolve, 50));
-			
+			await new Promise((resolve) => setTimeout(resolve, 50));
+
 			// Request camera access
-			stream = await navigator.mediaDevices.getUserMedia({ 
-				video: { 
+			stream = await navigator.mediaDevices.getUserMedia({
+				video: {
 					facingMode: 'environment', // Prefer back camera on mobile
 					width: { ideal: 1920 },
 					height: { ideal: 1080 }
-				} 
+				}
 			});
-			
+
 			// Attach stream to video element
 			if (videoElement) {
 				videoElement.srcObject = stream;
@@ -340,7 +356,8 @@
 		} catch (err: any) {
 			console.error('Camera access error:', err);
 			if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-				cameraError = 'Camera permission denied. Please allow camera access in your browser settings.';
+				cameraError =
+					'Camera permission denied. Please allow camera access in your browser settings.';
 			} else if (err.name === 'NotFoundError') {
 				cameraError = 'No camera found on this device.';
 			} else {
@@ -352,7 +369,7 @@
 
 	function stopCamera() {
 		if (stream) {
-			stream.getTracks().forEach(track => track.stop());
+			stream.getTracks().forEach((track) => track.stop());
 			stream = null;
 		}
 		showCamera = false;
@@ -366,7 +383,7 @@
 			console.error('Video or canvas element not available');
 			return;
 		}
-		
+
 		const context = canvasElement.getContext('2d');
 		if (!context) {
 			console.error('Could not get canvas context');
@@ -382,25 +399,25 @@
 
 		// Get the image as data URL for preview
 		capturedPhoto = canvasElement.toDataURL('image/jpeg', 0.9);
-		
+
 		// Show confirmation screen
 		showPhotoConfirmation = true;
 	}
 
 	function confirmPhoto() {
 		if (!capturedPhoto) return;
-		
+
 		// Convert data URL to blob and create file
 		fetch(capturedPhoto)
-			.then(res => res.blob())
-			.then(blob => {
+			.then((res) => res.blob())
+			.then((blob) => {
 				const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
 				imageFile = file;
 				imagePreview = capturedPhoto;
 				message = null;
 				stopCamera();
 			})
-			.catch(err => {
+			.catch((err) => {
 				console.error('Error creating file from captured photo:', err);
 				message = { type: 'error', text: 'Failed to process captured photo' };
 			});
@@ -430,8 +447,6 @@
 	$: currentItem = currentChallenge?.items[currentItemIndex];
 	$: canGoPrevious = currentItemIndex > 0;
 	$: canGoNext = currentChallenge && currentItemIndex < currentChallenge.items.length - 1;
-
-
 </script>
 
 <div class="challenge-container">
@@ -491,60 +506,60 @@
 	{:else}
 		<div class="active-challenge">
 			{#if currentChallenge}
-					<!-- Challenge info header (no card wrapper) -->
-					<div class="challenge-info-header">
-						<Badge variant={
-							currentChallenge.difficulty === 'easy' ? 'secondary' :
-							currentChallenge.difficulty === 'medium' ? 'default' : 'destructive'
-						}>
-							{currentChallenge.difficulty.toUpperCase()}
-						</Badge>
-						<span class="progress-text">{currentChallenge.completedItems} / {currentChallenge.totalItems}</span>
+				<!-- Challenge info header (no card wrapper) -->
+				<div class="challenge-info-header">
+					<Badge
+						variant={currentChallenge.difficulty === 'easy'
+							? 'secondary'
+							: currentChallenge.difficulty === 'medium'
+								? 'default'
+								: 'destructive'}
+					>
+						{currentChallenge.difficulty.toUpperCase()}
+					</Badge>
+					<span class="progress-text"
+						>{currentChallenge.completedItems} / {currentChallenge.totalItems}</span
+					>
+				</div>
+
+				{#if currentChallenge.isCompleted}
+					<Card class="completion-card">
+						<CardContent class="completion-content">
+							<h3 class="completion-title">🎉 Completed! 🎉</h3>
+							<p>You found all {currentChallenge.totalItems} items!</p>
+							<Button onclick={resetChallenge} size="lg">Start New</Button>
+						</CardContent>
+					</Card>
+				{:else if currentItem}
+					<!-- Visual indicator - circles for each item -->
+					<div class="items-indicator-section">
+						{#each currentChallenge.items as item, idx}
+							<div
+								class="item-circle"
+								class:found={item.found}
+								class:current={idx === currentItemIndex}
+								title="{item.name} - {item.found ? 'Found' : 'Not found'}"
+							></div>
+						{/each}
 					</div>
 
-					{#if currentChallenge.isCompleted}
-						<Card class="completion-card">
-							<CardContent class="completion-content">
-								<h3 class="completion-title">🎉 Completed! 🎉</h3>
-								<p>You found all {currentChallenge.totalItems} items!</p>
-								<Button onclick={resetChallenge} size="lg">Start New</Button>
-							</CardContent>
-						</Card>
-					{:else if currentItem}
-					
-						<!-- Visual indicator - circles for each item -->
-						<div class="items-indicator-section">
-							{#each currentChallenge.items as item, idx}
-								<div 
-									class="item-circle"
-									class:found={item.found}
-									class:current={idx === currentItemIndex}
-									title="{item.name} - {item.found ? 'Found' : 'Not found'}"
-								></div>
-							{/each}
-						</div>
+					<!-- Navigation buttons -->
+					<div class="navigation-section">
+						<Button
+							variant="outline"
+							onclick={moveToPreviousItem}
+							disabled={!canGoPrevious}
+							size="sm"
+						>
+							← Prev
+						</Button>
 
-						<!-- Navigation buttons -->
-						<div class="navigation-section">
-							<Button 
-								variant="outline" 
-								onclick={moveToPreviousItem} 
-								disabled={!canGoPrevious}
-								size="sm"
-							>
-								← Prev
-							</Button>
-							
-							<Button 
-								variant="outline" 
-								onclick={moveToNextItem} 
-								disabled={!canGoNext}
-								size="sm"
-							>
-								Next →
-							</Button>
-						</div>
+						<Button variant="outline" onclick={moveToNextItem} disabled={!canGoNext} size="sm">
+							Next →
+						</Button>
+					</div>
 
+<<<<<<< Updated upstream
 						<!-- Current item card -->
 						<Card class="current-item-card {currentItem.found ? 'found' : ''}" >
 							<CardContent class="compact-content">
@@ -594,78 +609,123 @@
 										{/if}
 
 										{#if imageFile && !currentItem.found}
+=======
+					<!-- Current item card -->
+					<Card class="current-item-card {currentItem.found ? 'found' : ''}">
+						<CardContent class="compact-content">
+							<!-- Replace this line in the current item card -->
+							<div class="item-name-large">{currentItem.name}</div>
+
+							{#if currentItem.found}
+								<div class="found-message">
+									<p class="found-icon">✅</p>
+									<p class="found-time">
+										{new Date(currentItem.foundAt || '').toLocaleTimeString()}
+									</p>
+								</div>
+							{:else}
+								<!-- Image upload section -->
+								<div class="upload-section-flex">
+									{#if imagePreview}
+										<div class="image-preview-container">
+											<img src={imagePreview} alt="Preview" class="preview-image" />
+>>>>>>> Stashed changes
 											<Button
-												onclick={verifyCurrentItem}
-												disabled={verifying}
-												size="lg"
-												class="w-full verify-button-large"
+												variant="destructive"
+												size="icon"
+												class="clear-button"
+												onclick={clearImage}
 											>
-												{verifying ? '⏳ Verifying...' : '✓ Verify'}
+												✕
 											</Button>
-										{/if}
-									</div>
-								{/if}
-							</CardContent>
-						</Card>
+										</div>
+									{:else}
+										<div class="take-photo-area">
+											<Button onclick={toggleCamera} size="lg" class="camera-button-large w-full">
+												📷 Take Photo
+											</Button>
+										</div>
+									{/if}
 
-				{#if showCamera}
-					<div class="camera-container">
-						{#if showPhotoConfirmation}
-							<!-- Photo confirmation screen -->
-							<div class="photo-confirmation">
-								<h3 class="confirmation-title">Use this photo?</h3>
-								<img src={capturedPhoto} alt="Captured" class="captured-preview" />
-								<div class="confirmation-buttons">
-									<Button variant="outline" size="lg" onclick={retakePhoto}>
-										🔄 Retake
-									</Button>
-									<Button size="lg" onclick={confirmPhoto}>
-										✓ Use Photo
-									</Button>
+									{#if message}
+										<Alert variant={message.type === 'success' ? 'default' : 'destructive'}>
+											{message.text}
+										</Alert>
+									{/if}
+
+									{#if imageFile && !currentItem.found}
+										<Button
+											onclick={verifyCurrentItem}
+											disabled={verifying}
+											size="lg"
+											class="verify-button-large w-full"
+										>
+											{verifying ? '⏳ Verifying...' : '✓ Verify'}
+										</Button>
+									{/if}
 								</div>
-								<Button variant="ghost" onclick={cancelCamera} class="cancel-link">
-									Cancel
-								</Button>
-							</div>
-						{:else}
-							<!-- Live camera view -->
-							<div class="camera-view">
-								<div class="camera-header">
-									<h3 class="camera-title">Take a Photo</h3>
-									<Button
-										variant="ghost"
-										size="icon"
-										onclick={cancelCamera}
-										class="close-camera-button"
-									>
-										✕
-									</Button>
+							{/if}
+						</CardContent>
+					</Card>
+
+					{#if showCamera}
+						<div class="camera-container">
+							{#if showPhotoConfirmation}
+								<!-- Photo confirmation screen -->
+								<div class="photo-confirmation">
+									<h3 class="confirmation-title">Use this photo?</h3>
+									<img src={capturedPhoto} alt="Captured" class="captured-preview" />
+									<div class="confirmation-buttons">
+										<Button variant="outline" size="lg" onclick={retakePhoto}>🔄 Retake</Button>
+										<Button size="lg" onclick={confirmPhoto}>✓ Use Photo</Button>
+									</div>
+									<Button variant="ghost" onclick={cancelCamera} class="cancel-link">Cancel</Button>
 								</div>
-								<!-- svelte-ignore a11y-media-has-caption -->
-								<video bind:this={videoElement} autoplay playsinline class="camera-video"></video>
-								<canvas bind:this={canvasElement} style="display: none;"></canvas>
-								{#if cameraError}
-									<div class="camera-error">{cameraError}</div>
-								{/if}
-								<div class="camera-controls">
-									<div class="capture-button-wrapper">
-										<button onclick={capturePhoto} class="capture-button-camera" type="button" disabled={!!cameraError} aria-label="Capture photo">
-											<span class="capture-inner"></span>
-										</button>
-										<span class="capture-label">Capture</span>
+							{:else}
+								<!-- Live camera view -->
+								<div class="camera-view">
+									<div class="camera-header">
+										<h3 class="camera-title">Take a Photo</h3>
+										<Button
+											variant="ghost"
+											size="icon"
+											onclick={cancelCamera}
+											class="close-camera-button"
+										>
+											✕
+										</Button>
+									</div>
+									<!-- svelte-ignore a11y-media-has-caption -->
+									<video bind:this={videoElement} autoplay playsinline class="camera-video"></video>
+									<canvas bind:this={canvasElement} style="display: none;"></canvas>
+									{#if cameraError}
+										<div class="camera-error">{cameraError}</div>
+									{/if}
+									<div class="camera-controls">
+										<div class="capture-button-wrapper">
+											<button
+												onclick={capturePhoto}
+												class="capture-button-camera"
+												type="button"
+												disabled={!!cameraError}
+												aria-label="Capture photo"
+											>
+												<span class="capture-inner"></span>
+											</button>
+											<span class="capture-label">Capture</span>
+										</div>
 									</div>
 								</div>
-							</div>
-						{/if}
-					</div>
-				{/if}
-
-						<!-- Action buttons at bottom -->
-						<div class="action-buttons-bottom">
-							<Button variant="secondary" onclick={resetChallenge}>🆕 New</Button>
-							<Button variant="destructive" onclick={quitChallenge}>❌ Quit</Button>
+							{/if}
 						</div>
 					{/if}
+
+					<!-- Action buttons at bottom -->
+					<div class="action-buttons-bottom">
+						<Button variant="secondary" onclick={resetChallenge}>🆕 New</Button>
+						<Button variant="destructive" onclick={quitChallenge}>❌ Quit</Button>
+					</div>
+				{/if}
 			{/if}
 		</div>
 	{/if}
@@ -790,6 +850,17 @@
 		border: 1px solid hsl(var(--border));
 	}
 
+	.navigation-section :global(button) {
+		background: hsl(var(--primary)) !important;
+		color: hsl(var(--primary-foreground)) !important;
+		border: 1px solid hsl(var(--primary)) !important;
+		font-weight: 700 !important;
+	}
+
+	.navigation-section :global(button:hover:not(:disabled)) {
+		background: hsl(var(--primary) / 0.9) !important;
+	}
+
 	/* Items indicator section - circles for each item */
 	.items-indicator-section {
 		display: flex;
@@ -817,11 +888,15 @@
 	.item-circle.found {
 		background: #4caf50;
 		border-color: #45a049;
-		box-shadow: 0 0 12px rgba(76, 175, 80, 0.7), 0 2px 4px rgba(0, 0, 0, 0.3);
+		box-shadow:
+			0 0 12px rgba(76, 175, 80, 0.7),
+			0 2px 4px rgba(0, 0, 0, 0.3);
 	}
 
 	.item-circle.current {
-		box-shadow: 0 0 0 3px hsl(var(--primary) / 0.6), 0 2px 4px rgba(0, 0, 0, 0.4);
+		box-shadow:
+			0 0 0 3px hsl(var(--primary) / 0.6),
+			0 2px 4px rgba(0, 0, 0, 0.4);
 		transform: scale(1.15);
 		border-width: 3px;
 	}
@@ -924,9 +999,10 @@
 		font-size: clamp(1.25rem, 4vw, 1.75rem);
 		font-weight: 900;
 		text-transform: uppercase;
-		letter-spacing: 1px;
+		letter-spacing: 2px;
 		text-align: center;
 		color: hsl(var(--primary));
+<<<<<<< Updated upstream
 		background: linear-gradient(135deg, hsl(var(--primary)) 0%, #8b5cf6 50%, #ec4899 100%);
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
@@ -934,6 +1010,10 @@
 		margin: 0.25rem 0 0.5rem 0;
 		text-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
 		animation: glow 3s ease-in-out infinite;
+=======
+		text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+		margin: 0.25rem 0 0.5rem 0;
+>>>>>>> Stashed changes
 	}
 	
 	/* Fallback for browsers that don't support background-clip */
@@ -946,8 +1026,13 @@
 	}
 
 	@keyframes glow {
-		0%, 100% { filter: brightness(1); }
-		50% { filter: brightness(1.2); }
+		0%,
+		100% {
+			filter: brightness(1);
+		}
+		50% {
+			filter: brightness(1.2);
+		}
 	}
 
 	/* Found message - compact */

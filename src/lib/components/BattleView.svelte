@@ -124,7 +124,7 @@
 
 <style>
 	.battle-view {
-		background: white;
+		background: rgb(255, 255, 255);
 		border-radius: 8px;
 		padding: 2rem;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -207,7 +207,7 @@
 	}
 
 	.player-card {
-		background: #f8f9fa;
+		background: #9e4a4a;
 		border-radius: 8px;
 		padding: 1.5rem;
 		border: 2px solid transparent;

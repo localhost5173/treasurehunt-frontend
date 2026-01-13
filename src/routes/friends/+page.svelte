@@ -231,3 +231,191 @@
 		</DialogFooter>
 	</DialogContent>
 </Dialog>
+
+<style>
+/* ================================
+   TREASURE HUNT THEME — FRIENDS PAGE
+   ================================ */
+
+:root {
+  --parchment-light: #c6a873;
+  --parchment-mid: #5e4328;
+  --parchment-dark: #02431aff;
+
+  --leather-dark: #5a3a1c;
+  --leather: #7a5230;
+  --leather-light: #9d6c3b;
+
+  --gold: #ffd678;
+  --gold-soft: #ffe9b8;
+  --gold-glow: rgba(255, 215, 140, 0.5);
+
+  --ink-dark: #2a1a0e;
+  --ink-muted: rgba(60, 35, 20, 0.65);
+
+  --shadow-deep: rgba(0, 0, 0, 0.45);
+}
+
+/* -------------------------------
+   PAGE BACKGROUND (MAP-LIKE)
+--------------------------------*/
+.container {
+  background: linear-gradient(
+    180deg,
+    var(--parchment-dark) 0%,
+    var(--parchment-mid) 40%,
+    var(--parchment-light) 100%
+  );
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 8px 35px var(--shadow-deep);
+  backdrop-filter: blur(8px);
+}
+
+/* PAGE TITLE */
+h1 {
+  color: var(--gold);
+  text-shadow: 0 0 6px var(--gold-glow);
+  font-family: 'Fredoka One', sans-serif;
+}
+
+/* -------------------------------
+   CARDS (Treasure parchment slabs)
+--------------------------------*/
+.card,
+[data-shadcn-card] {
+  background: rgba(150, 110, 70, 0.35) !important;
+  border: 2px solid rgba(255, 225, 180, 0.25) !important;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 6px 22px var(--shadow-deep);
+  border-radius: 1rem !important;
+}
+
+/* Card headings */
+.card h3,
+[data-shadcn-card] h3 {
+  font-family: 'Fredoka One', sans-serif;
+  color: var(--gold);
+  text-shadow: 0 0 5px rgba(255, 200, 120, 0.3);
+}
+
+/* Card descriptions */
+.card p,
+[data-shadcn-card] p {
+  color: var(--ink-muted);
+}
+
+/* -------------------------------
+   BADGES (gold coins)
+--------------------------------*/
+.badge,
+[data-shadcn-badge] {
+  background: var(--leather-light) !important;
+  border: 1px solid var(--gold) !important;
+  color: var(--gold-soft) !important;
+  font-family: 'Fredoka One', sans-serif;
+}
+
+/* -------------------------------
+   BUTTONS (Leather buttons)
+--------------------------------*/
+button,
+[data-shadcn-button] {
+  background: linear-gradient(
+    145deg,
+    var(--leather) 0%,
+    var(--leather-dark) 100%
+  ) !important;
+  border: 2px solid rgba(255, 225, 160, 0.35) !important;
+  color: var(--gold-soft) !important;
+
+  font-family: 'Fredoka One', sans-serif;
+  border-radius: 0.7rem !important;
+
+  transition: all 0.25s ease;
+  text-shadow: 0 0 3px rgba(255, 240, 200, 0.25);
+}
+
+button:hover,
+[data-shadcn-button]:hover {
+  background: linear-gradient(
+    145deg,
+    var(--leather-light) 0%,
+    var(--leather) 100%
+  ) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(140, 105, 60, 0.45);
+}
+
+/* Secondary / outline */
+button[data-variant="outline"],
+[data-shadcn-button][data-variant="outline"] {
+  background: rgba(255, 240, 200, 0.08) !important;
+  color: var(--leather-dark) !important;
+  border: 2px solid var(--leather-light) !important;
+}
+
+/* Destructive (decline) */
+button[data-variant="destructive"],
+[data-shadcn-button][data-variant="destructive"] {
+  background: #7b2a2a !important;
+  border-color: #b85c5c !important;
+}
+
+button[data-variant="destructive"]:hover {
+  background: #923636 !important;
+}
+
+/* -------------------------------
+   INPUTS / SELECTS (map scribbles)
+--------------------------------*/
+input,
+select,
+[data-shadcn-input] {
+  background: rgba(255, 240, 210, 0.1) !important;
+  border: 2px solid rgba(120, 85, 55, 0.4) !important;
+  color: var(--ink-dark) !important;
+
+  border-radius: 0.6rem !important;
+  font-family: 'Fredoka One', sans-serif;
+}
+
+input:focus,
+select:focus {
+  outline: none !important;
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 6px var(--gold-glow) !important;
+}
+
+/* -------------------------------
+   LABELS (map ink)
+--------------------------------*/
+label,
+[data-shadcn-label] {
+  color: var(--leather-dark) !important;
+  font-weight: 600;
+  font-family: 'Fredoka One', sans-serif;
+}
+
+/* -------------------------------
+   MODAL (Treasure chest pop-up)
+--------------------------------*/
+.dialog-content,
+[data-shadcn-dialog-content] {
+  background: var(--parchment-light) !important;
+  border: 2px solid var(--parchment-dark) !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 10px 35px var(--shadow-deep);
+}
+
+/* Modal title */
+.dialog-title {
+  color: var(--gold) !important;
+  font-family: 'Fredoka One', sans-serif;
+}
+
+/* Modal description */
+.dialog-description {
+  color: var(--ink-muted) !important;
+}
+</style>
