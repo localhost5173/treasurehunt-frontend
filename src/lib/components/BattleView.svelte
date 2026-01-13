@@ -73,9 +73,6 @@
 		<div class="player-card" class:winner={isWinner}>
 			<div class="player-header">
 				<h3>You</h3>
-				{#if isWinner}
-					<span class="winner-badge">👑 Winner</span>
-				{/if}
 			</div>
 			<div class="player-name">{currentUser.name}</div>
 			<div class="progress-container">
@@ -96,9 +93,6 @@
 		<div class="player-card" class:winner={opponentIsWinner}>
 			<div class="player-header">
 				<h3>Opponent</h3>
-				{#if opponentIsWinner}
-					<span class="winner-badge">👑 Winner</span>
-				{/if}
 			</div>
 			<div class="player-name">{opponent?.name || 'Unknown'}</div>
 			<div class="progress-container">
