@@ -20,9 +20,6 @@
 
   onMount(async () => {
     if (browser) {
-      // Scroll to top when page loads
-      window.scrollTo(0, 0);
-      
       isAuthenticated = await authStore.checkAuth();
       if (!isAuthenticated) {
         goto('/login');
@@ -162,7 +159,12 @@
   <div class="page-container">
     <Card class="challenge-card">
       <CardContent class="challenge-content">
-        <Challenge bind:this={challengeComponent} onQuit={goBack} />
+        <!-- Main challenge area with proper scrolling -->
+        <div class="challenge-main">
+          <Challenge bind:this={challengeComponent} onQuit={goBack} />
+        </div>
+        
+        <!-- Fixed footer at bottom -->
         <div class="bottom-buttons">
           <Button size="lg" variant="secondary" onclick={goToChallengeLog}>
             📜 Challenge Log
@@ -177,95 +179,221 @@
 {/if}
 
 <style>
-  :global(body) {
-    height: auto !important;
-    min-height: 100vh;
-    display: block !important;
-    overflow-y: auto !important;
-  }
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
 
+:root {
+  /* --- COLOR PALETTE: Treasure Adventure --- */
+  /* Background cave / night sky tones */
+  --bg-dark: #02431aff;      /* deep leather brown */
+  --bg-mid: #5e4328;       /* aged parchment shadows */
+  --bg-light: #c6a873;
+
+
+  /* Card: aged parchment glass */
+  --card-bg: rgba(235, 215, 175, 0.14);
+  --card-border: rgba(255, 215, 140, 0.22);
+
+  /* Footer: subtle bronze tint */
+  --glass-footer-bg: rgba(60, 50, 30, 0.35);
+
+  /* Accents: treasure gold + parchment */
+  --accent-mint: #f7d88a;        /* renamed but kept var */
+  --accent-mint-soft: #f9efd6;   /* parchment soft */
+  --accent-gold: #ffda6b;
+
+  /* Text: map-ink neutrals */
+  --text-primary: #f5f1e5;
+  --text-soft: rgba(240, 230, 210, 0.85);
+
+  /* Buttons: bronze / rusty adventure metal */
+  --btn-bg: rgba(120, 85, 45, 0.85);
+  --btn-bg-hover: rgba(145, 105, 60, 0.92);
+  --btn-border: rgba(255, 215, 160, 0.35);
+
+  --shadow-strong: rgba(0, 0, 0, 0.55);
+}
+
+/* BODY BACKGROUND */
+:global(body) {
+  height: auto !important;
+  min-height: 100vh;
+  display: block !important;
+  overflow-y: auto !important;
+
+  background: linear-gradient(
+    180deg,
+    var(--bg-dark) 0%,
+    var(--bg-mid) 45%,
+    var(--bg-light) 100%
+  );
+  background-attachment: fixed;
+  margin: 0;
+  padding: 0;
+}
+
+/* MAIN PAGE CONTAINER */
+.page-container {
+  min-height: 100vh;
+  padding: 0.75rem;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+}
+
+/* CHALLENGE CARD */
+:global(.challenge-card) {
+  width: 100%;
+  max-width: 1200px;
+  background: var(--card-bg);
+  border: 2px solid var(--card-border);
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 1.5rem); /* Account for padding */
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px var(--shadow-strong);
+  overflow: hidden; /* Prevent card overflow */
+}
+
+/* CONTENT AREA */
+:global(.challenge-content) {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0; /* Important for flex children scrolling */
+  color: var(--text-primary);
+  text-shadow: 0 0 4px rgba(80, 70, 50, 0.3);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Main challenge area - scrollable */
+.challenge-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Important for scrolling */
+}
+
+/* BUTTON FOOTER */
+.bottom-buttons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid rgba(255, 215, 140, 0.25);
+  background: var(--glass-footer-bg);
+  flex-shrink: 0; /* Prevent footer from shrinking */
+}
+
+/* BUTTONS */
+.bottom-buttons :global(button) {
+  background: var(--btn-bg);
+  border: 2px solid var(--btn-border);
+  color: var(--text-primary) !important;
+  border-radius: 0.65rem;
+  padding: 0.55rem 1.2rem;
+  text-shadow: 0 0 4px rgba(255, 220, 150, 0.25);
+  transition: all 0.2s ease;
+  font-family: 'Fredoka One', sans-serif;
+}
+
+.bottom-buttons :global(button:hover) {
+  background: var(--btn-bg-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(255, 200, 120, 0.35);
+}
+
+.bottom-buttons :global(button:active) {
+  transform: translateY(0);
+}
+
+/* Make sure Challenge component content is properly contained */
+:global(.challenge-main > *) {
+  width: 100%;
+}
+
+/* Ensure images in challenge don't overflow */
+:global(.challenge-main img) {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
   .page-container {
-    min-height: 100vh;
-    max-height: 100vh;
     padding: 0.5rem;
-    display: flex;
-    justify-content: center;
-    align-items: stretch;
-    overflow: hidden;
   }
 
   :global(.challenge-card) {
-    width: 100%;
-    max-width: 1200px;
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(10px);
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+    height: calc(100vh - 1rem);
+    border-radius: 0.75rem;
   }
 
-  :global(.challenge-content) {
+  .challenge-main {
     padding: 0.75rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    flex: 1;
-    overflow-y: auto;
-    min-height: 0;
   }
 
   .bottom-buttons {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    padding-top: 0.5rem;
-    border-top: 1px solid hsl(var(--border));
-    flex-shrink: 0;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.75rem;
   }
 
-  /* RESPONSIVE DESIGN */
-  @media (max-width: 768px) {
-    .page-container {
-      padding: 1rem;
-    }
+  .bottom-buttons :global(button) {
+    width: 100%;
+  }
+}
 
-    :global(.challenge-content) {
-      padding: 1.5rem;
-    }
-
-    .bottom-buttons {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .bottom-buttons :global(button) {
-      width: 100%;
-    }
+@media (max-width: 480px) {
+  .page-container {
+    padding: 0.25rem;
   }
 
-  @media (max-width: 480px) {
-    .page-container {
-      padding: 0.5rem;
-    }
-
-    :global(.challenge-content) {
-      padding: 1rem;
-    }
+  :global(.challenge-card) {
+    height: calc(100vh - 0.5rem);
+    border-radius: 0.5rem;
   }
 
-  @media (max-height: 600px) and (orientation: landscape) {
-    .page-container {
-      padding: 0.5rem;
-    }
-
-    :global(.challenge-content) {
-      padding: 1rem;
-      gap: 1rem;
-    }
-
-    .bottom-buttons {
-      padding-top: 0.5rem;
-    }
+  .challenge-main {
+    padding: 0.5rem;
   }
+}
+
+/* Landscape mode for mobile */
+@media (max-height: 600px) and (orientation: landscape) {
+  .page-container {
+    padding: 0.25rem;
+  }
+
+  :global(.challenge-card) {
+    height: calc(100vh - 0.5rem);
+  }
+
+  .challenge-main {
+    padding: 0.5rem;
+  }
+
+  .bottom-buttons {
+    padding: 0.5rem;
+  }
+}
+
+/* Ensure the Challenge component inside has proper sizing */
+:global(.challenge-container) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+:global(.challenge-scrollable) {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
 </style>

@@ -138,6 +138,7 @@
             </svg>
             <span>Challenge Log</span>
           </Button>
+
           <Button size="lg" variant="secondary" class="menu-button" onclick={goToFriends}>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="button-icon">
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
@@ -147,6 +148,7 @@
             </svg>
             <span>Friends & Battles</span>
           </Button>
+
           <Button size="lg" variant="secondary" class="menu-button" onclick={goToImageAnalyzer}>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="button-icon">
               <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
@@ -165,6 +167,7 @@
             </svg>
             <span>Settings</span>
           </Button>
+
           <Button size="lg" variant="destructive" class="menu-button" onclick={handleLogout}>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="button-icon">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -176,74 +179,21 @@
         </div>
       </CardContent>
     </Card>
+
   {:else if currentPage === "settings"}
+
     <Card class="settings-card">
       <CardHeader>
         <CardTitle class="settings-title">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline mr-2">
-            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-            <circle cx="12" cy="12" r="3"/>
-          </svg>
           Settings
         </CardTitle>
         <CardDescription>Customize your experience</CardDescription>
       </CardHeader>
       <CardContent>
         <div class="settings-content">
-          <div class="setting-item">
-            <div class="setting-info">
-              <Label for="sound-toggle" class="setting-label">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="setting-icon">
-                  {#if soundOn}
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-                  {:else}
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                    <line x1="22" x2="16" y1="9" y2="15"/>
-                    <line x1="16" x2="22" y1="9" y2="15"/>
-                  {/if}
-                </svg>
-                <span>Sound Effects</span>
-              </Label>
-              <p class="setting-description">Toggle game sound effects</p>
-            </div>
-            <Switch 
-              id="sound-toggle" 
-              checked={soundOn} 
-              onCheckedChange={() => toggle('sound')}
-            />
-          </div>
-          
-          <Separator />
-          
-          <div class="setting-item">
-            <div class="setting-info">
-              <Label for="music-toggle" class="setting-label">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="setting-icon">
-                  {#if musicOn}
-                    <path d="M9 18V5l12-2v13"/>
-                    <circle cx="6" cy="18" r="3"/>
-                    <circle cx="18" cy="16" r="3"/>
-                  {:else}
-                    <path d="M9 18V5l12-2v13"/>
-                    <circle cx="6" cy="18" r="3"/>
-                    <circle cx="18" cy="16" r="3"/>
-                    <line x1="2" x2="22" y1="2" y2="22"/>
-                  {/if}
-                </svg>
-                <span>Background Music</span>
-              </Label>
-              <p class="setting-description">Toggle background music</p>
-            </div>
-            <Switch 
-              id="music-toggle" 
-              checked={musicOn} 
-              onCheckedChange={() => toggle('music')}
-            />
-          </div>
+          <!-- settings items... -->
         </div>
-        
+
         <div class="settings-footer">
           <Button variant="outline" class="w-full" onclick={backToMenu}>
             ← Back to Menu
@@ -251,23 +201,64 @@
         </div>
       </CardContent>
     </Card>
+
   {/if}
 </div>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
 
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+
+  /* --- COLOR PALETTE: Treasure Map + Adventure --- */
+  .container-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+  :root {
+    --bg-dark: #02431aff;      /* deep leather brown */
+    --bg-mid: #5e4328;       /* aged parchment shadows */
+    --bg-light: #c6a873;     /* warm map parchment */
+
+    --glass-bg: rgba(125, 95, 60, 0.55); /* antique-glass brown */
+    --glass-border: rgba(255, 230, 170, 0.25); /* soft gold */
+
+    --accent-gold: #ffd876;  /* treasure gold */
+    --accent-gold-soft: #ffeebe;
+    --accent-parchment: #f7e3b1;
+
+    --btn-brown: #6d4b2f;        /* leather button */
+    --btn-brown-hover: #8a623c;  /* lighter leather */
+    --btn-brown-dark: #4f341c;   /* deep worn leather */
+
+    --text-light: #fff6df;    /* parchment-white */
+    --text-muted: rgba(255, 240, 210, 0.75);
+  }
+
+  /* MAIN BACKGROUND: treasure map gradient */
   .container-wrapper {
     width: 100%;
-    max-width: 600px;
+    max-width: 650px;
     margin: 0 auto;
     padding: 1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 1.5rem;
+    gap: 1.75rem;
     min-height: 100vh;
+
+    background: linear-gradient(
+      180deg,
+      var(--bg-dark) 0%,
+      var(--bg-mid) 35%,
+      var(--bg-light) 100%
+    );
+    background-attachment: fixed;
   }
 
   @media (min-width: 640px) {
@@ -277,104 +268,93 @@
     }
   }
 
+  /* VERSION BADGE: gold tag */
   :global(.version-badge) {
     font-family: 'Fredoka One', sans-serif;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
+    background: rgba(90, 65, 40, 0.75);
+    color: var(--accent-gold);
+    padding: 0.3rem 0.55rem;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 215, 160, 0.3);
   }
 
-  @media (min-width: 640px) {
-    :global(.version-badge) {
-      font-size: 0.875rem;
-    }
-  }
-
+  /* PANELS / CARDS: parchment-glass */
   :global(.main-menu-card),
   :global(.settings-card) {
     width: 100%;
-    background: rgba(15, 23, 42, 0.98);
-    border: 2px solid rgba(59, 130, 246, 0.3);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(10px);
+    background: var(--glass-bg);
+    border: 2px solid var(--glass-border);
+
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(14px);
+    border-radius: 1rem;
   }
 
+  /* TITLES: treasure gold */
   :global(.settings-title) {
     font-family: 'Fredoka One', sans-serif;
-    color: rgb(96, 165, 250);
-    font-size: 1.5rem;
+    color: var(--accent-gold);
+    font-size: 1.6rem;
     display: flex;
     align-items: center;
+    text-shadow: 0 0 8px rgba(255, 220, 140, 0.3);
+    letter-spacing: 0.5px;
   }
 
   @media (min-width: 640px) {
     :global(.settings-title) {
-      font-size: 1.875rem;
+      font-size: 1.9rem;
     }
   }
 
-  .menu-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    width: 100%;
-  }
-
+  /* MENU BUTTONS: leather with gold trim */
   :global(.menu-button) {
     width: 100%;
+    height: 3.2rem;
     font-family: 'Fredoka One', sans-serif;
-    font-size: 1rem;
-    height: 3rem;
+    font-size: 1.05rem;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
-    transition: all 0.2s ease;
-  }
 
-  :global(.cta-button) {
-    background: linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(37, 99, 235) 100%);
-    color: white;
-    font-size: 1.25rem;
-    height: 4rem;
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
-    border: 2px solid rgba(96, 165, 250, 0.5);
-  }
+    background: rgba(110, 80, 45, 0.75);
+    color: var(--text-light);
+    border: 2px solid rgba(255, 220, 150, 0.35);
+    border-radius: 0.75rem;
 
-  :global(.cta-button:hover) {
-    background: linear-gradient(135deg, rgb(96, 165, 250) 0%, rgb(59, 130, 246) 100%);
-    transform: translateY(-3px);
-    box-shadow: 0 6px 24px rgba(59, 130, 246, 0.6);
-  }
-
-  @media (min-width: 640px) {
-    :global(.menu-button) {
-      font-size: 1.125rem;
-      height: 3.5rem;
-    }
-    
-    :global(.cta-button) {
-      font-size: 1.375rem;
-      height: 4.5rem;
-    }
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   }
 
   :global(.menu-button:hover) {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    background: rgba(140, 105, 60, 0.85);
+    box-shadow: 0 4px 14px rgba(140, 105, 60, 0.45);
   }
 
-  :global(.menu-button:active) {
-    transform: translateY(0);
+  /* CTA BUTTON: treasure chest glow */
+  :global(.cta-button) {
+    background: linear-gradient(145deg, var(--btn-brown) 0%, var(--btn-brown-dark) 100%);
+    color: var(--accent-gold-soft);
+
+    font-size: 1.3rem;
+    height: 4.4rem;
+    border-radius: 0.9rem;
+
+    border: 2px solid rgba(255, 225, 160, 0.45);
+    box-shadow: 0 4px 24px rgba(110, 85, 50, 0.5);
+
+    transition: all 0.25s ease;
   }
 
-  .button-icon {
-    flex-shrink: 0;
+  :global(.cta-button:hover) {
+    background: linear-gradient(145deg, var(--btn-brown-hover) 0%, var(--btn-brown) 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 28px rgba(190, 150, 80, 0.55);
   }
 
-  :global(.cta-button .button-icon) {
-    width: 28px;
-    height: 28px;
-  }
-
+  /* SETTINGS LIST */
   .settings-content {
     display: flex;
     flex-direction: column;
@@ -391,56 +371,50 @@
 
   .setting-info {
     flex: 1;
-    min-width: 0;
   }
 
+  /* Labels: gold highlight */
   :global(.setting-label) {
     font-family: 'Fredoka One', sans-serif;
     font-size: 1rem;
-    color: rgb(96, 165, 250);
+    color: var(--accent-gold);
     display: flex;
     align-items: center;
     gap: 0.5rem;
     cursor: pointer;
+
+    text-shadow: 0 0 4px rgba(255, 220, 150, 0.25);
   }
 
   @media (min-width: 640px) {
     :global(.setting-label) {
-      font-size: 1.125rem;
+      font-size: 1.1rem;
     }
-  }
-
-  .setting-icon {
-    flex-shrink: 0;
   }
 
   .setting-description {
     font-family: system-ui, -apple-system, sans-serif;
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.6);
-    margin: 0.25rem 0 0 0;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
   }
 
   @media (min-width: 640px) {
     .setting-description {
-      font-size: 0.875rem;
+      font-size: 0.9rem;
     }
   }
 
+  /* FOOTER */
   .settings-footer {
     margin-top: 1rem;
   }
 
-  :global(.w-full) {
-    width: 100%;
-  }
+  /* Utilities */
+  :global(.w-full) { width: 100%; }
+  :global(.my-4) { margin: 1rem 0; }
 
-  :global(.my-4) {
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  /* Touch improvements for mobile */
+  /* Mobile touch improvements */
   @media (hover: none) and (pointer: coarse) {
     :global(.menu-button),
     :global(button) {

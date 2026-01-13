@@ -336,6 +336,7 @@
 		min-height: 100vh;
 	}
 
+	/* HEADER AREA */
 	.header {
 		text-align: center;
 		margin-bottom: 3rem;
@@ -344,22 +345,29 @@
 	.header h1 {
 		font-size: 2.5rem;
 		margin-bottom: 0.5rem;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+		/* Treasure gold gradient */
+		background: linear-gradient(135deg, #f7d88a 0%, #e6b45f 50%, #c18a3a 100%);
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
 		background-clip: text;
 	}
 
 	.subtitle {
-		color: #666;
+		color: #b9b4a8;
 		font-size: 1.125rem;
 	}
 
+	/* LOADING / EMPTY / ERROR CARDS */
 	:global(.loading-card),
 	:global(.error-card),
 	:global(.empty-card) {
 		max-width: 600px;
 		margin: 0 auto;
+		background: rgba(240, 230, 210, 0.12);
+		border: 1px solid rgba(255, 215, 140, 0.25);
+		backdrop-filter: blur(10px);
+		border-radius: 0.75rem;
 	}
 
 	:global(.loading-content),
@@ -379,32 +387,37 @@
 		height: 50px;
 	}
 
+	/* ERROR COLORS → Rusty danger */
 	:global(.error-card) {
-		border: 2px solid hsl(var(--destructive));
-		background: hsl(var(--destructive) / 0.1);
+		border: 2px solid #b44a3a;
+		background: rgba(180, 70, 50, 0.12);
 	}
 
 	.error-text {
-		color: hsl(var(--destructive));
+		color: #b44a3a;
 		font-size: 1.125rem;
 		margin: 0;
 	}
 
+	/* EMPTY STATE */
 	.empty-icon {
 		font-size: 5rem;
+		color: #e8c88a;
 	}
 
 	:global(.empty-content) h2 {
 		font-size: 2rem;
 		margin: 0;
+		color: #f5f1e5;
 	}
 
 	:global(.empty-content) p {
-		color: #666;
+		color: #b9b4a8;
 		font-size: 1.125rem;
 		margin: 0;
 	}
 
+	/* STAT GRID */
 	.stats-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -414,16 +427,21 @@
 
 	:global(.stat-card) {
 		transition: all 0.2s;
+		background: rgba(235, 215, 175, 0.08);
+		border: 1px solid rgba(255, 215, 130, 0.25);
+		backdrop-filter: blur(6px);
+		border-radius: 0.75rem;
 	}
 
 	:global(.stat-card:hover) {
 		transform: translateY(-4px);
-		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
 	}
 
 	:global(.stat-content) {
 		text-align: center;
 		padding: 2rem 1rem;
+		color: #f5f1e5;
 	}
 
 	.stat-value {
@@ -431,24 +449,27 @@
 		font-weight: 800;
 		line-height: 1;
 		margin-bottom: 0.5rem;
+		color: #ffd887;
 	}
 
 	.stat-label {
-		color: hsl(var(--muted-foreground));
+		color: #b9b4a8;
 		font-size: 1rem;
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 1px;
 	}
 
+	/* COMPLETED / INCOMPLETE CARDS */
 	:global(.completed-card) {
-		border: 2px solid #4caf50;
+		border: 2px solid #d3a64c; /* warm gold */
 	}
 
 	:global(.incomplete-card) {
-		border: 2px solid #ff9800;
+		border: 2px solid #c4752f; /* bronze */
 	}
 
+	/* FILTER BUTTONS */
 	.filter-buttons {
 		display: flex;
 		gap: 1rem;
@@ -457,6 +478,7 @@
 		flex-wrap: wrap;
 	}
 
+	/* CHALLENGE LIST GRID */
 	.challenges-list {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -466,11 +488,16 @@
 
 	:global(.challenge-card) {
 		transition: all 0.3s;
+		background: rgba(240, 230, 210, 0.1);
+		border: 1px solid rgba(230, 200, 140, 0.25);
+		backdrop-filter: blur(8px);
+		border-radius: 0.75rem;
+		color: #f5f1e5;
 	}
 
 	:global(.challenge-card:hover) {
 		transform: translateY(-4px);
-		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 	}
 
 	.card-header-content {
@@ -487,24 +514,26 @@
 		flex-wrap: wrap;
 	}
 
+	/* BADGES */
 	:global(.completed-badge) {
-		background: #4caf50;
-		color: white;
-		border-color: #4caf50;
+		background: #d3a64c;
+		color: #2a1d0f;
+		border-color: #d3a64c;
 	}
 
 	:global(.progress-badge) {
-		background: #ff9800;
-		color: white;
-		border-color: #ff9800;
+		background: #c4752f;
+		color: #2a1d0f;
+		border-color: #c4752f;
 	}
 
 	.challenge-date {
-		color: hsl(var(--muted-foreground));
+		color: #b9b4a8;
 		font-size: 0.875rem;
 		white-space: nowrap;
 	}
 
+	/* STAT BLOCK INSIDE CARDS */
 	.challenge-stats {
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
@@ -520,6 +549,7 @@
 
 	.stat-icon {
 		font-size: 1.75rem;
+		color: #e8c88a;
 	}
 
 	.stat-info {
@@ -531,22 +561,19 @@
 		font-size: 1.25rem;
 		font-weight: 700;
 		line-height: 1;
+		color: #ffd887;
 	}
 
 	.stat-text {
 		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
+		color: #b9b4a8;
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
 	}
 
-	:global(.my-4) {
-		margin-top: 1rem;
-		margin-bottom: 1rem;
-	}
-
+	/* ITEM PREVIEW GRID */
 	.items-preview {
-		background: hsl(var(--muted) / 0.3);
+		background: rgba(235, 215, 175, 0.08);
 		padding: 1rem;
 		border-radius: 8px;
 	}
@@ -562,18 +589,19 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: hsl(var(--background));
-		border: 2px solid hsl(var(--border));
+		background: rgba(240, 230, 210, 0.15);
+		border: 2px solid rgba(230, 200, 140, 0.3);
 		border-radius: 6px;
 		font-size: 0.75rem;
 		font-weight: 600;
 		transition: all 0.2s;
+		color: #f5f1e5;
 	}
 
 	.preview-item.found {
-		background: #4caf50;
-		border-color: #4caf50;
-		color: white;
+		background: #d3a64c;
+		border-color: #d3a64c;
+		color: #2a1d0f;
 	}
 
 	.check-icon {
@@ -581,16 +609,13 @@
 	}
 
 	.item-number {
-		color: hsl(var(--muted-foreground));
+		color: #b9b4a8;
 	}
 
+	/* ACTIONS */
 	.challenge-actions {
 		display: flex;
 		gap: 0.75rem;
-	}
-
-	:global(.w-full) {
-		width: 100%;
 	}
 
 	:global(.no-results) {
@@ -599,7 +624,7 @@
 	}
 
 	:global(.no-results) p {
-		color: hsl(var(--muted-foreground));
+		color: #b9b4a8;
 		font-size: 1.125rem;
 		margin: 0;
 	}
@@ -612,7 +637,7 @@
 		flex-wrap: wrap;
 	}
 
-	/* Responsive Design */
+	/* RESPONSIVE */
 	@media (max-width: 768px) {
 		.challenge-log-container {
 			padding: 1rem;
