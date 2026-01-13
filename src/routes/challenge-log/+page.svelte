@@ -31,12 +31,18 @@
 		error = '';
 
 		try {
-			challenges = await api.challenges.getAll(token);
+			const data = await api.challenges.getAll(token);
+			// Ensure we always have an array, even if API returns null/undefined
+			challenges = Array.isArray(data) ? data : [];
 			// Sort by most recent first
-			challenges.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+			if (challenges.length > 0) {
+				challenges.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+			}
 		} catch (err: any) {
 			console.error('Failed to load challenges:', err);
 			error = err.message || 'Failed to load challenge history';
+			// Ensure challenges is an empty array on error
+			challenges = [];
 		} finally {
 			loading = false;
 		}
@@ -129,14 +135,14 @@
 		return remainingHours > 0 ? `${days}d ${remainingHours}h` : `${days}d`;
 	}
 
-	$: filteredChallenges = challenges.filter((c) => {
+	$: filteredChallenges = (challenges || []).filter((c) => {
 		if (filter === 'completed') return c.isCompleted;
 		if (filter === 'incomplete') return !c.isCompleted;
 		return true;
 	});
 
-	$: completedCount = challenges.filter((c) => c.isCompleted).length;
-	$: incompleteCount = challenges.filter((c) => !c.isCompleted).length;
+	$: completedCount = (challenges || []).filter((c) => c.isCompleted).length;
+	$: incompleteCount = (challenges || []).filter((c) => !c.isCompleted).length;
 </script>
 
 <svelte:head>
